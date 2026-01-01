@@ -1,3 +1,23 @@
-/* You can add global styles to this file, and also import other style files */
+/* You can add global styles to this file, and also import othedocument.documentElement.style.setProperty(property, value)or style files */
 
 @import "tailwindcss";
+
+html {
+    --ash-grey: #cad2c5ff;
+    --muted-teal: #84a98cff;
+    --deep-teal: #52796fff;
+    --dark-slate-grey: #354f52ff;
+    --charcoal-blue: #2f3e46ff;
+}
+
+html.dark-mode {
+    --colour-background: var(--dark-slate-grey);
+    --colour-text: var(--ash-grey);
+    --colour-highlight: var(--muted-teal);
+    --colour-on-background: var(--deep-teal);
+    --colour-background-variant: var(--charcoal-blue);
+}
+
+html.light-mode {
+    /* Add light mode */
+}
