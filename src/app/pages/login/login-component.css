@@ -1,0 +1,68 @@
+.form-container {
+    display: flex;
+    height: 80vh;
+    justify-content: center;
+    align-items: center;
+}
+
+form.user-form {
+    width: 25%;
+    background-color: inherit;
+    padding: 2rem;
+}
+
+form.user-form h1{
+    text-align: center;
+    color: var(--colour-text);
+    font-size: 5rem;
+    margin-bottom: 3rem;
+}
+
+form.user-form label {
+    color: var(--colour-text);
+    font-size: 2rem;
+}
+
+form.user-form input {
+    font-size: 2.5rem;
+    color: var(--colour-text);
+    padding: 0.5rem 1.4rem;
+    border: 2px solid var(--colour-highlight);
+    width: 100%;
+    border-radius: 1rem;
+    margin-bottom: 0.8rem;
+    outline: none;
+}
+
+form.user-form input:focus{
+    background-color: var(--colour-on-background);
+}
+
+form.user-form .form-error {
+    height: 1.6rem;
+    font-size: 1rem;
+    color: rgb(178, 37, 37);
+}
+
+form.user-form .button-container{
+    width: 100%;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+form.user-form .button {
+    width: 49%;
+    padding: 0.5rem 2rem;
+    font-size: 2rem;
+    font-weight: bold;
+    border-radius: 1.2rem;
+    border: none;
+    background-color: var(--colour-on-background);
+    color: var(--colour-text);
+}
+
+form.user-form .button:hover {
+    transform: translate(1px, 1px);
+    color: var(--colour-highlight);
+}

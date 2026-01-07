@@ -1,0 +1,26 @@
+<div class="form-container">
+    <form class="user-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <h1>Login or Sign Up</h1>
+        <label for="username">Username</label>
+        <input type="text" name="username" formControlName="username">
+        <div class="form-error" [hidden]="getErrorMessage('username')">
+            {{getErrorMessage('username')}}
+        </div>
+
+        <label for="password">Password</label>
+        <input type="text" name="password" formControlName="password">
+        <div class="form-error" [hidden]="getErrorMessage('password')">
+            {{getErrorMessage('password')}}
+        </div>
+
+        <div class="button-container">
+            <button class="button" [disabled]="loginForm.invalid">
+                Login
+            </button>
+
+            <button class="button" [disabled]="loginForm.invalid">
+                Sign Up
+            </button>
+        </div>
+    </form>
+</div>

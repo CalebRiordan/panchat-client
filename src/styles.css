@@ -8,6 +8,8 @@ html {
     --deep-teal: #52796fff;
     --dark-slate-grey: #354f52ff;
     --charcoal-blue: #2f3e46ff;
+
+    font-size: 62.5%;
 }
 
 html.dark-mode {
