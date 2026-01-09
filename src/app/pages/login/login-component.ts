@@ -87,10 +87,10 @@ export class LoginComponent implements OnInit {
         } else if (controlName == 'password') {
           return 'Password must be between 8 and 16 characters';
         }
-        return "minlength or maxlength violated, but no error message";
+        return 'This field is required';
       }
     }
 
-    return 'No error message';
+    return '';
   }
 }

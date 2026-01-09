@@ -5,53 +5,62 @@
     align-items: center;
 }
 
-form.user-form {
-    width: 25%;
+form {
+    width: 35%;
     background-color: inherit;
     padding: 2rem;
 }
 
-form.user-form h1{
+form h1 {
     text-align: center;
     color: var(--colour-text);
     font-size: 5rem;
     margin-bottom: 3rem;
 }
 
-form.user-form label {
+form label {
     color: var(--colour-text);
-    font-size: 2rem;
+    font-size: 3rem;
 }
 
-form.user-form input {
+form .input-group {
+    position: relative;
+}
+
+form input {
+    width: 100%;
+    display: block;
     font-size: 2.5rem;
     color: var(--colour-text);
     padding: 0.5rem 1.4rem;
     border: 2px solid var(--colour-highlight);
-    width: 100%;
     border-radius: 1rem;
-    margin-bottom: 0.8rem;
+    margin-bottom: 3rem;
     outline: none;
 }
 
-form.user-form input:focus{
+form input:focus {
     background-color: var(--colour-on-background);
 }
 
-form.user-form .form-error {
-    height: 1.6rem;
-    font-size: 1rem;
-    color: rgb(178, 37, 37);
+form .form-error {
+    position: absolute;
+    left: 0;
+    top: 105%;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: rgb(255, 93, 93);
+    white-space: nowrap;
 }
 
-form.user-form .button-container{
+form .button-container {
     width: 100%;
-    margin-top: 1rem;
+    padding-top: 1.2rem;
     display: flex;
     justify-content: space-between;
 }
 
-form.user-form .button {
+form .button {
     width: 49%;
     padding: 0.5rem 2rem;
     font-size: 2rem;
@@ -62,16 +71,16 @@ form.user-form .button {
     color: var(--colour-text);
 }
 
-form.user-form .button:hover {
+form .button:hover {
     transform: translate(1px, 1px);
     color: var(--colour-highlight);
 }
 
-form.user-form .button:disabled {
+form .button:disabled {
     background-color: gray;
 }
 
-form.user-form .button:disabled:hover {
+form .button:disabled:hover {
     transform: none;
     color: var(--colour-text)
 }

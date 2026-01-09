@@ -1,16 +1,21 @@
 <div class="form-container">
     <form class="user-form" [formGroup]="loginForm">
         <h1>Login or Sign Up</h1>
+
         <label for="username">Username</label>
-        <input type="text" name="username" formControlName="username">
-        <div class="form-error" [hidden]="getErrorMessage('username')">
-            {{getErrorMessage('username')}}
+        <div class="input-group">
+            <input type="text" name="username" formControlName="username">
+            <div class="form-error" *ngIf="getErrorMessage('username')">
+                {{getErrorMessage('username')}}
+            </div>
         </div>
 
         <label for="password">Password</label>
-        <input type="password" name="password" formControlName="password">
-        <div class="form-error" [hidden]="getErrorMessage('password')">
-            {{getErrorMessage('password')}}
+        <div class="input-group">
+            <input type="password" name="password" formControlName="password">
+            <div class="form-error" *ngIf="getErrorMessage('password')">
+                {{getErrorMessage('password')}}
+            </div>
         </div>
 
         <div class="button-container">
