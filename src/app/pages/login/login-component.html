@@ -1,5 +1,5 @@
 <div class="form-container">
-    <form class="user-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <form class="user-form" [formGroup]="loginForm">
         <h1>Login or Sign Up</h1>
         <label for="username">Username</label>
         <input type="text" name="username" formControlName="username">
@@ -8,17 +8,17 @@
         </div>
 
         <label for="password">Password</label>
-        <input type="text" name="password" formControlName="password">
+        <input type="password" name="password" formControlName="password">
         <div class="form-error" [hidden]="getErrorMessage('password')">
             {{getErrorMessage('password')}}
         </div>
 
         <div class="button-container">
-            <button class="button" [disabled]="loginForm.invalid">
+            <button class="button" [disabled]="loginForm.invalid" (click)="onLogin()">
                 Login
             </button>
 
-            <button class="button" [disabled]="loginForm.invalid">
+            <button class="button" [disabled]="loginForm.invalid" (click)="onSignUp()">
                 Sign Up
             </button>
         </div>

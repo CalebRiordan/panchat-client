@@ -66,3 +66,12 @@ form.user-form .button:hover {
     transform: translate(1px, 1px);
     color: var(--colour-highlight);
 }
+
+form.user-form .button:disabled {
+    background-color: gray;
+}
+
+form.user-form .button:disabled:hover {
+    transform: none;
+    color: var(--colour-text)
+}

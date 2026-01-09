@@ -3,7 +3,7 @@ import { env } from '../../environments/environment';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, map, Observable, tap, throwError } from 'rxjs';
 
-interface LoginResponse {
+interface AuthResponse {
   token: string;
 }
 const LOGIN_ERROR_MAP: Record<string, string> = {
@@ -19,16 +19,24 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  login(username: string, password: string): Observable<string> {
-    return this.http.post<LoginResponse>(this.baseApiUrl, { username, password }).pipe(
+  private apiAuth(username: string, password: string, method: 'login' | 'register'): Observable<string> {
+    return this.http.post<AuthResponse>(`${this.baseApiUrl}/${method}`, { username, password }).pipe(
       tap((res) => localStorage.setItem('jwt_token', res.token)),
       map((res) => res.token),
       catchError((err) => throwError(() => this.formatError(err)))
     );
   }
 
+  login(username: string, password: string): Observable<string> {
+    return this.apiAuth(username, password, 'login')
+  }
+
   logout() {
     localStorage.removeItem('jwt_token');
+  }
+
+  register(username: string, password: string): Observable<string> {
+    return this.apiAuth(username, password, 'register')
   }
 
   private formatError(err: HttpErrorResponse) {

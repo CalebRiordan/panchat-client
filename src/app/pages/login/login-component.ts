@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './login-component.html',
   styleUrl: './login-component.css',
 })
@@ -23,38 +24,45 @@ export class LoginComponent implements OnInit {
       password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(16)]],
     });
   }
+
   ngOnInit(): void {
     // Clear any error messages for form controls whose value changes
     this.loginForm.valueChanges.subscribe(() => {
       Object.keys(this.loginForm.controls).forEach((key) => {
         const control = this.loginForm.get(key);
         if (control?.errors) {
-          control.setErrors(null);
+          control.updateValueAndValidity({ emitEvent: false})
         }
       });
     });
   }
 
-  onSubmit() {
+  onLogin() {
     if (this.loginForm.valid) {
-      // Login
       this.authService.login(this.formControl('email'), this.formControl('password')).subscribe({
-        // Success logging in
-        next: () => {
-          this.router.navigate(['/']);
-        },
-        // Error logging in - Update form UI with server error messages
-        error: (errors: Record<string, string>) => {
-          Object.keys(errors).forEach((field) => {
-            if (field == 'general') {
-              this.loginForm.get('password')?.setErrors({ serverError: errors['general'] });
-            } else {
-              this.loginForm.get(field)?.setErrors({ serverError: errors[field] });
-            }
-          });
-        },
+        next: () => this.router.navigate(['/']),
+        error: (errors: Record<string, string>) => this.handleAuthError(errors),
       });
     }
+  }
+
+  onSignUp() {
+    if (this.loginForm.valid) {
+      this.authService.register(this.formControl('email'), this.formControl('password')).subscribe({
+        next: () => this.router.navigate(['/']),
+        error: (errors: Record<string, string>) => this.handleAuthError(errors),
+      });
+    }
+  }
+
+  private handleAuthError(errors: Record<string, string>): void {
+    Object.keys(errors).forEach((field) => {
+      if (field === 'general') {
+        this.loginForm.get('password')?.setErrors({ serverError: errors['general'] });
+      } else {
+        this.loginForm.get(field)?.setErrors({ serverError: errors[field] });
+      }
+    });
   }
 
   formControl(controlName: string): string {
@@ -79,9 +87,10 @@ export class LoginComponent implements OnInit {
         } else if (controlName == 'password') {
           return 'Password must be between 8 and 16 characters';
         }
+        return "minlength or maxlength violated, but no error message";
       }
     }
 
-    return '';
+    return 'No error message';
   }
 }
