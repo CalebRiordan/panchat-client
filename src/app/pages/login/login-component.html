@@ -5,17 +5,23 @@
         <label for="username">Username</label>
         <div class="input-group">
             <input type="text" name="username" formControlName="username">
-            <div class="form-error" *ngIf="getErrorMessage('username')">
-                {{getErrorMessage('username')}}
+
+            @if (usernameError){
+            <div class="form-error">
+                {{usernameError}}
             </div>
+            }
         </div>
 
         <label for="password">Password</label>
         <div class="input-group">
             <input type="password" name="password" formControlName="password">
-            <div class="form-error" *ngIf="getErrorMessage('password')">
-                {{getErrorMessage('password')}}
+
+            @if (passwordError){
+            <div class="form-error">
+                {{passwordError}}
             </div>
+            }
         </div>
 
         <div class="button-container">

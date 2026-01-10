@@ -6,10 +6,7 @@ import { catchError, map, Observable, tap, throwError } from 'rxjs';
 interface AuthResponse {
   token: string;
 }
-const LOGIN_ERROR_MAP: Record<string, string> = {
-  Username: 'username',
-  Password: 'password',
-};
+const AUTH_FIELDS: Array<string> = ['username', 'password'];
 
 @Injectable({
   providedIn: 'root',
@@ -19,8 +16,14 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  private apiAuth(username: string, password: string, method: 'login' | 'register'): Observable<string> {
-    return this.http.post<AuthResponse>(`${this.baseApiUrl}/${method}`, { username, password }).pipe(
+  private apiAuth(
+    username: string,
+    password: string,
+    method: 'login' | 'register'
+  ): Observable<string> {
+    const url = `${this.baseApiUrl}Auth/${method}`;
+
+    return this.http.post<AuthResponse>(url, { username, password }).pipe(
       tap((res) => localStorage.setItem('jwt_token', res.token)),
       map((res) => res.token),
       catchError((err) => throwError(() => this.formatError(err)))
@@ -28,7 +31,7 @@ export class AuthService {
   }
 
   login(username: string, password: string): Observable<string> {
-    return this.apiAuth(username, password, 'login')
+    return this.apiAuth(username, password, 'login');
   }
 
   logout() {
@@ -36,23 +39,21 @@ export class AuthService {
   }
 
   register(username: string, password: string): Observable<string> {
-    return this.apiAuth(username, password, 'register')
+    return this.apiAuth(username, password, 'register');
   }
 
   private formatError(err: HttpErrorResponse) {
     const result: Record<string, string> = {};
+    const errors = err.error?.errors;
 
     // API returned object with error messages for multiple fields
-    if (err.error?.errors) {
-      Object.keys(err.error?.errors).forEach((serverError) => {
-        const uiKey = LOGIN_ERROR_MAP[serverError];
-
-        if (uiKey) {
-          result[uiKey] = serverError[0]; // Take the first error message
+    if (errors) {
+      Object.keys(errors).forEach((fieldName) => {
+        const localFieldName = fieldName.toLowerCase();
+        if (AUTH_FIELDS.includes(localFieldName)) {
+          result[localFieldName] = errors[fieldName][0]; // Take the first error message
         }
       });
-
-      return result;
     }
     // API returned simple string error message
     else {
@@ -60,8 +61,8 @@ export class AuthService {
         typeof err.error === 'string'
           ? err.error
           : err.error?.message ?? 'An unknown error occurred';
-
-      return result;
     }
+
+    return result;
   }
 }

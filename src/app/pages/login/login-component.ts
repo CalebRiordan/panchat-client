@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
@@ -13,11 +13,14 @@ import { CommonModule } from '@angular/common';
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
+  usernameError = '';
+  passwordError = '';
 
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.loginForm = this.formBuilder.group({
       username: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(16)]],
@@ -30,8 +33,12 @@ export class LoginComponent implements OnInit {
     this.loginForm.valueChanges.subscribe(() => {
       Object.keys(this.loginForm.controls).forEach((key) => {
         const control = this.loginForm.get(key);
+
+        this.usernameError = '';
+        this.passwordError = '';
+
         if (control?.errors) {
-          control.updateValueAndValidity({ emitEvent: false})
+          control.updateValueAndValidity({ emitEvent: false });
         }
       });
     });
@@ -39,7 +46,7 @@ export class LoginComponent implements OnInit {
 
   onLogin() {
     if (this.loginForm.valid) {
-      this.authService.login(this.formControl('email'), this.formControl('password')).subscribe({
+      this.authService.login(this.formControl('username'), this.formControl('password')).subscribe({
         next: () => this.router.navigate(['/']),
         error: (errors: Record<string, string>) => this.handleAuthError(errors),
       });
@@ -48,20 +55,28 @@ export class LoginComponent implements OnInit {
 
   onSignUp() {
     if (this.loginForm.valid) {
-      this.authService.register(this.formControl('email'), this.formControl('password')).subscribe({
-        next: () => this.router.navigate(['/']),
-        error: (errors: Record<string, string>) => this.handleAuthError(errors),
-      });
+      this.authService
+        .register(this.formControl('username'), this.formControl('password'))
+        .subscribe({
+          next: () => this.router.navigate(['/']),
+          error: (errors: Record<string, string>) => this.handleAuthError(errors),
+        });
     }
   }
 
   private handleAuthError(errors: Record<string, string>): void {
+    console.log('handleAuthErrors()');
+
     Object.keys(errors).forEach((field) => {
-      if (field === 'general') {
-        this.loginForm.get('password')?.setErrors({ serverError: errors['general'] });
-      } else {
-        this.loginForm.get(field)?.setErrors({ serverError: errors[field] });
+      if (field == 'general') {
+        this.passwordError = errors['general'];
+      } else if (field == 'username') {
+        this.usernameError = errors[field];
+      } else if (field == 'password') {
+        this.passwordError = errors[field];
       }
+
+      this.cdr.detectChanges();
     });
   }
 
