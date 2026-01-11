@@ -1,28 +1,30 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { CommonModule } from '@angular/common';
+import { finalize, Observable } from 'rxjs';
+import { setCurrentInjector } from '@angular/core/primitives/di';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-session',
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
-  templateUrl: './login-component.html',
-  styleUrl: './login-component.css',
+  templateUrl: './session-component.html',
+  styleUrl: './session-component.css',
 })
-export class LoginComponent implements OnInit {
-  loginForm!: FormGroup;
+export class SessionComponent implements OnInit {
+  sessionForm!: FormGroup;
   usernameError = '';
   passwordError = '';
+  awaitingResult = false;
 
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private router: Router
   ) {
-    this.loginForm = this.formBuilder.group({
+    this.sessionForm = this.formBuilder.group({
       username: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(16)]],
       password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(16)]],
     });
@@ -30,9 +32,9 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     // Clear any error messages for form controls whose value changes
-    this.loginForm.valueChanges.subscribe(() => {
-      Object.keys(this.loginForm.controls).forEach((key) => {
-        const control = this.loginForm.get(key);
+    this.sessionForm.valueChanges.subscribe(() => {
+      Object.keys(this.sessionForm.controls).forEach((key) => {
+        const control = this.sessionForm.get(key);
 
         this.usernameError = '';
         this.passwordError = '';
@@ -44,19 +46,12 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  onLogin() {
-    if (this.loginForm.valid) {
-      this.authService.login(this.formControl('username'), this.formControl('password')).subscribe({
-        next: () => this.router.navigate(['/']),
-        error: (errors: Record<string, string>) => this.handleAuthError(errors),
-      });
-    }
-  }
+  private sendAuthRequest(actionFn: () => Observable<string>) {
+    if (this.sessionForm.valid) {
+      this.awaitingResult = true;
 
-  onSignUp() {
-    if (this.loginForm.valid) {
-      this.authService
-        .register(this.formControl('username'), this.formControl('password'))
+      actionFn()
+        .pipe(finalize(() => (this.awaitingResult = false)))
         .subscribe({
           next: () => this.router.navigate(['/']),
           error: (errors: Record<string, string>) => this.handleAuthError(errors),
@@ -64,8 +59,18 @@ export class LoginComponent implements OnInit {
     }
   }
 
+  onLogin() {
+    const { username, password } = this.sessionForm.value;
+    this.sendAuthRequest(() => this.authService.login(username, password));
+  }
+
+  onSignUp() {
+    const { username, password } = this.sessionForm.value;
+    this.sendAuthRequest(() => this.authService.register(username, password));
+  }
+
   private handleAuthError(errors: Record<string, string>): void {
-    console.log('handleAuthErrors()');
+    this.sessionForm.get('password')?.reset();
 
     Object.keys(errors).forEach((field) => {
       if (field == 'general') {
@@ -75,17 +80,15 @@ export class LoginComponent implements OnInit {
       } else if (field == 'password') {
         this.passwordError = errors[field];
       }
-
-      this.cdr.detectChanges();
     });
   }
 
   formControl(controlName: string): string {
-    return this.loginForm.get(controlName)?.value ?? null;
+    return this.sessionForm.get(controlName)?.value ?? null;
   }
 
   getErrorMessage(controlName: string): string {
-    const control = this.loginForm.get(controlName);
+    const control = this.sessionForm.get(controlName);
 
     if (control && control.errors && control.touched) {
       // Check for the server error first

@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './pages/login/login-component';
+import { SessionComponent } from './pages/session/session-component';
 
 export const routes: Routes = [
     {
-        path: 'login',
-        component: LoginComponent
+        path: 'session',
+        component: SessionComponent
     }
 ];

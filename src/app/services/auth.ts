@@ -24,7 +24,14 @@ export class AuthService {
     const url = `${this.baseApiUrl}Auth/${method}`;
 
     return this.http.post<AuthResponse>(url, { username, password }).pipe(
-      tap((res) => localStorage.setItem('jwt_token', res.token)),
+      tap((res) => {
+        if (!res || !res.token){
+          console.error("Unexpected response object format: ", res)
+        }
+
+        // Will throw error if parsing fails, caught by catchError operator
+        localStorage.setItem('jwt_token', res.token);
+      }),
       map((res) => res.token),
       catchError((err) => throwError(() => this.formatError(err)))
     );

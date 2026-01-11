@@ -1,5 +1,10 @@
-<div class="form-container">
-    <form class="user-form" [formGroup]="loginForm">
+<div class="form-container" [class.processing]="awaitingResult">
+    <form class="user-form" [formGroup]="sessionForm">
+
+        @if(awaitingResult){
+        <div class="loading-bar"></div>
+        }
+
         <h1>Login or Sign Up</h1>
 
         <label for="username">Username</label>
@@ -25,11 +30,11 @@
         </div>
 
         <div class="button-container">
-            <button class="button" [disabled]="loginForm.invalid" (click)="onLogin()">
+            <button class="button" [disabled]="sessionForm.invalid || awaitingResult" (click)="onLogin()">
                 Login
             </button>
 
-            <button class="button" [disabled]="loginForm.invalid" (click)="onSignUp()">
+            <button class="button" [disabled]="sessionForm.invalid || awaitingResult" (click)="onSignUp()">
                 Sign Up
             </button>
         </div>
