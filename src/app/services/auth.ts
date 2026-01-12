@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { env } from '../../environments/environment';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, map, Observable, tap, throwError } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
 
 interface AuthResponse {
   token: string;
@@ -25,8 +26,8 @@ export class AuthService {
 
     return this.http.post<AuthResponse>(url, { username, password }).pipe(
       tap((res) => {
-        if (!res || !res.token){
-          console.error("Unexpected response object format: ", res)
+        if (!res || !res.token) {
+          console.error('Unexpected response object format: ', res);
         }
 
         // Will throw error if parsing fails, caught by catchError operator
@@ -47,6 +48,18 @@ export class AuthService {
 
   register(username: string, password: string): Observable<string> {
     return this.apiAuth(username, password, 'register');
+  }
+
+  isLoggedIn() {
+    const token = localStorage.getItem('jwt_token');
+    if (!token) return false;
+
+    try {
+      const decoded = jwtDecode(token);
+      return Date.now() > (decoded.exp ?? 0) * 1000;
+    } catch (e) {
+      return false;
+    }
   }
 
   private formatError(err: HttpErrorResponse) {
