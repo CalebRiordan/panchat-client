@@ -22,7 +22,7 @@ export class AuthService {
     password: string,
     method: 'login' | 'register'
   ): Observable<string> {
-    const url = `${this.baseApiUrl}Auth/${method}`;
+    const url = `${this.baseApiUrl}/api/Auth/${method}`;
 
     return this.http.post<AuthResponse>(url, { username, password }).pipe(
       tap((res) => {

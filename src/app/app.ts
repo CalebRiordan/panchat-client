@@ -9,14 +9,7 @@ import { ThemeService } from './services/theme.service';
   styleUrl: './app.css',
 })
 export class App {
-  constructor(private themeService: ThemeService) {
-    let deviceId = localStorage.getItem('chat_device_id');
-
-    if (!deviceId) {
-      deviceId = crypto.randomUUID();
-      localStorage.setItem('chat_device_id', deviceId);
-    }
-  }
+  constructor(private themeService: ThemeService) {}
 
   protected readonly title = signal('panchat-client');
 }
