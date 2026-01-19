@@ -10,8 +10,8 @@ export const routes: Routes = [
         canActivate: [guestGuard]
     },
     {
-        path: '/',
+        path: '',
         component: ChatComponent,
-        canActivate: [authGuard]
+        // canActivate: [authGuard]
     }
 ];

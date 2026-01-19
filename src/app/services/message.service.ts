@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SignalRService } from './signalR.service';
+import { SignalRService } from './signalr.service';
 import { CreateMessageModel, Message } from '../models/message';
 import { MediaMessage } from '../models/mediaMessage';
 import { env } from '../../environments/environment';
