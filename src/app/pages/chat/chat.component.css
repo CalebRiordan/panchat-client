@@ -1,0 +1,13 @@
+.chat-container {
+    width: 60%;
+    margin: auto;
+    background-color: red;
+}
+
+.no-messages-text{
+    color: var(--colour-on-background);
+    font-size: 1rem;
+    width: 100%;
+    text-align: center;
+}
+
