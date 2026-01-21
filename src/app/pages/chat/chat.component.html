@@ -1,9 +1,17 @@
 <!-- Add navbar here in future -->
 
 <div class="chat-container">
-@for (message of messages; track message.id){
 
-} @empty {
+    @for (message of messages(); track message.id){
+
+    } @empty {
     <div class="no-messages-text">There are no messages on this chat yet</div>
-}
+    }
+
+    <div class="text-box">
+        <span class="add-attachment-icon"><i class="fa-solid fa-plus"></i></span>
+        <span class="placeholder-text">Message</span>
+        <span class="add-image-icon">...</span>
+    </div>
+
 </div>

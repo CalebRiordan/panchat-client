@@ -1,13 +1,45 @@
 .chat-container {
     width: 60%;
+    height: 100vh;
+    padding: 6rem 2rem;
     margin: auto;
-    background-color: red;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .no-messages-text{
     color: var(--colour-on-background);
-    font-size: 1rem;
+    margin-top: 5rem;
+    font-size: 2.5rem;
     width: 100%;
     text-align: center;
 }
 
+.text-box {
+    width: 100%;
+    min-height: 5rem;
+    padding: 1.5rem 2rem;
+    margin: 2rem;
+    background-color: var(--colour-on-background);
+    border: 0.2px solid var(--colour-on-background-contrast);
+    border-radius: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2.5rem
+}
+
+.text-box span {
+    color: var(--colour-highlight);
+}
+
+.add-attachment-icon i{
+    font-size: 3rem;
+}
+
+.text-box .placeholder-text {
+    flex-grow: 1;
+    font-size: 2rem;
+    color: var(--colour-on-background-contrast)
+}
