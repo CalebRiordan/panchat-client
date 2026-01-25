@@ -3,8 +3,8 @@
 @import "tailwindcss";
 
 html {
-    --ash-grey: #cad2c5ff;
-    --muted-teal: #84a98cff;
+    --muted-olive: #9dbf86;
+    --shamerock: #569b65;
     --deep-teal: #52796f;
     --granite: #38534C;
     --dark-slate-grey: #354f52ff;
@@ -15,8 +15,8 @@ html {
 
 html.dark-mode {
     --colour-background: var(--dark-slate-grey);
-    --colour-text: var(--ash-grey);
-    --colour-highlight: var(--muted-teal);
+    --colour-text: var(--muted-olive);
+    --colour-highlight: var(--shamerock);
     --colour-on-background: var(--granite);
     --colour-on-background-contrast: var(--deep-teal);
     --colour-background-variant: var(--charcoal-blue);

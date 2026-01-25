@@ -8,7 +8,7 @@
     justify-content: space-between;
 }
 
-.no-messages-text{
+.no-messages-text {
     color: var(--colour-on-background);
     margin-top: 5rem;
     font-size: 2.5rem;
@@ -16,30 +16,77 @@
     text-align: center;
 }
 
+.create-message-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 1rem;
+}
+
 .text-box {
     width: 100%;
     min-height: 5rem;
     padding: 1.5rem 2rem;
-    margin: 2rem;
     background-color: var(--colour-on-background);
     border: 0.2px solid var(--colour-on-background-contrast);
     border-radius: 2rem;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: end;
     gap: 2.5rem
 }
 
 .text-box span {
-    color: var(--colour-highlight);
+    color: var(--colour-text);
 }
 
-.add-attachment-icon i{
+.add-attachment-icon i {
     font-size: 3rem;
 }
 
-.text-box .placeholder-text {
+.text-box .content {
     flex-grow: 1;
     font-size: 2rem;
-    color: var(--colour-on-background-contrast)
+    resize: none;
+    overflow-y: hidden;
+    display: block;
+    height: auto;
+    color: var(--colour-text);
+    border: none;
+    outline: none;
+    font-weight: 600;
+    padding: 0 0.4rem;
+}
+
+.text-box .content::placeholder {
+    color: var(--colour-on-background-contrast);
+}
+
+.text-box .add-image-icon i {
+    font-size: 2.5rem;
+}
+
+.btn-send-message {
+    min-width: 6rem;
+    max-width: 6rem;
+    height: 6rem;
+    background-color: var(--colour-highlight);
+    border-radius: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-send-message:disabled {
+    background-color: var(--colour-on-background-contrast);
+}
+
+.btn-send-message svg {
+    width: 50%;
+    fill: var(--colour-background);
+    transform: rotate(45deg) translate(-10%, 10%);
+}
+
+.btn-send-message:hover:not(:disabled), .text-box i:hover {
+    filter: brightness(1.2);
 }

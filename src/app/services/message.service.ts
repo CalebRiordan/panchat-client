@@ -15,11 +15,10 @@ export class MessageService {
   private baseApiUrl = env.baseApiUrl;
   private deviceId!: string;
 
-  constructor(private signalR: SignalRService, private http: HttpClient) {
-    if (localStorage.getItem('chat_device_id')) {
-      this.deviceId = crypto.randomUUID();
-      localStorage.setItem('chat_device_id', this.deviceId);
-    }
+  constructor(private signalR: SignalRService, private http: HttpClient) {}
+
+  init(deviceId: string){
+    this.deviceId = deviceId;
   }
 
   getLatestMessages(fromDate?: Date, fromMessageWithId?: string, limit: number = 50): Observable<Message[]> {
@@ -37,6 +36,10 @@ export class MessageService {
 
   // Send text message
   sendTextMessage(messageContent: string): Observable<Message> {
+    if (!this.deviceId){
+        throw new Error("MessageService must be initialized with a device ID first");
+    }
+
     const message: CreateMessageModel = {
       deviceId: this.deviceId,
       content: messageContent,
@@ -48,6 +51,10 @@ export class MessageService {
 
   // Send message with media attachment
   sendMediaMessage(file: File, caption: string): Observable<Message> {
+    if (!this.deviceId){
+        throw new Error("MessageService must be initialized with a device ID first");
+    }
+
     const fileType = file.type.split('/')[1];
     if (!this.isAllowedType(fileType)) {
       throw new Error('Unsupported file type');
