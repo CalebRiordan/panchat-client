@@ -1,16 +1,19 @@
 <!-- Add navbar here in future -->
 
 <div class="chat-container">
-
-    @for (message of messages(); track message.id){
-    @if (message.deviceId == deviceId){
-    <div class="message-box local-message">{{ message.content }}</div>
-    } @else {
-    <div class="message-box foreign-message">{{ message.content }}</div>
-    }
-    } @empty {
-    <div class="no-messages-text">There are no messages on this chat yet</div>
-    }
+    <div class="messages-container" #messagesContainer (scroll)="onScroll()">
+        @for (message of messages(); track message.id; let i = $index){
+        @if (message.deviceId == deviceId){
+        <div class="message-box local-message" [class.same-device]="messages()[i-1]?.deviceId == message.deviceId">{{
+            message.content }}</div>
+        } @else {
+        <div class="message-box foreign-message" [class.same-device]="messages()[i-1]?.deviceId == message.deviceId">{{
+            message.content }}</div>
+        }
+        } @empty {
+        <div class="no-messages-text">There are no messages on this chat yet</div>
+        }
+    </div>
 
     <div class="create-message-controls">
         <div class="text-box">
