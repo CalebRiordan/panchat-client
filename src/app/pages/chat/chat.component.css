@@ -16,7 +16,7 @@
     overflow-y: scroll;
     display: flex;
     flex-direction: column;
-    
+
     scrollbar-width: thin;
     scrollbar-color: var(--colour-on-background-contrast) var(--colour-background-variant);
 }
@@ -34,7 +34,7 @@
     box-shadow: 2px 2px 4px var(--colour-background-variant);
 }
 
-.message-box.local-message{
+.message-box.local-message {
     align-self: flex-end;
     background-color: var(--colour-on-background);
     border-radius: 1rem 0 1rem 1rem;
@@ -70,6 +70,15 @@
     justify-content: space-between;
     align-items: end;
     gap: 2.5rem
+}
+
+.text-box.disabled {
+    filter: grayscale(20%);
+}
+
+.text-box.disabled .content {
+    filter: grayscale(10%);
+    cursor: default;
 }
 
 .text-box span {
@@ -123,6 +132,7 @@
     transform: rotate(45deg) translate(-10%, 10%);
 }
 
-.btn-send-message:hover:not(:disabled), .text-box i:hover {
+.btn-send-message:hover:not(:disabled),
+.text-box i:hover {
     filter: brightness(1.2);
 }

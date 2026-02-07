@@ -46,7 +46,7 @@ export class MessageService {
       dateTimeSent: new Date(),
     };
 
-    return this.http.post<Message>(`${this.baseApiUrl}/api/message/send`, message);
+    return this.http.post<Message>(`${this.baseApiUrl}/api/message`, message);
   }
 
   // Send message with media attachment

@@ -1,7 +1,7 @@
-import { AfterViewChecked, Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, effect, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
 import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
-import { BehaviorSubject } from 'rxjs';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-chat',
@@ -9,13 +9,18 @@ import { BehaviorSubject } from 'rxjs';
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
 })
-export class ChatComponent implements OnInit, AfterViewChecked {
+export class ChatComponent implements OnInit {
   messages = signal<Message[]>([]);
+  sendingMessage = signal(false);
   deviceId!: string;
 
-  @ViewChild('MessagesContainer') private messagesContainer!: ElementRef;
+  @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
+  @ViewChild('messageInput') private messageInput!: ElementRef;
 
-  constructor(private messageService: MessageService) {
+  constructor(
+    private messageService: MessageService,
+    private toastService: ToastService,
+  ) {
     // Get device ID
     var tempDeviceId = localStorage.getItem('chat_device_id');
     if (!tempDeviceId) {
@@ -25,6 +30,14 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     this.deviceId = tempDeviceId;
 
     messageService.init(this.deviceId);
+
+    effect(() => {
+      const currentMessages = this.messages();
+
+      if (currentMessages.length > 0) {
+        setTimeout(() => this.scrollToBottom(), 100);
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -42,13 +55,9 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     }
 
     // Listen for new messages
-    this.messageService.onIncomingMessage((m: Message) =>
-      this.messages.update((msgs) => [...msgs, m])
-    );
-  }
-
-  ngAfterViewChecked(): void {
-    this.scrollToBottom();
+    this.messageService.onIncomingMessage((m: Message) => {
+      this.messages.update((msgs) => [...msgs, m]);
+    });
   }
 
   private scrollToBottom() {
@@ -67,8 +76,6 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     }
   }
 
-  onScroll(): void {}
-
   adjustHeight(el: HTMLTextAreaElement) {
     if (el.scrollHeight > 200) {
       el.style.height = 200 + 'px';
@@ -78,6 +85,31 @@ export class ChatComponent implements OnInit, AfterViewChecked {
       el.style.height = 'auto';
       el.style.height = el.scrollHeight + 'px';
       el.style.overflowY = 'hidden';
+    }
+  }
+
+  onSend(event?: Event) {
+    const content = this.messageInput.nativeElement.value;
+    event?.preventDefault();
+
+    if (content) {
+      this.sendingMessage.update(() => true);
+      this.messageService.sendTextMessage(content).subscribe({
+        next: (m: Message) => {
+          this.messages.update((msgs) => [...msgs, m]);
+
+          this.messageInput.nativeElement.style.height = 'auto';
+          this.messageInput.nativeElement.style.overflowY = 'hidden';
+          this.messageInput.nativeElement.value = '';
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastService.show('An error occurred while trying to send the message', 'error');
+        },
+        complete: () => {
+          this.sendingMessage.update(() => false);
+        },
+      });
     }
   }
 }

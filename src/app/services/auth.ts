@@ -56,7 +56,7 @@ export class AuthService {
 
     try {
       const decoded = jwtDecode(token);
-      return Date.now() > (decoded.exp ?? 0) * 1000;
+      return Date.now() < (decoded.exp ?? 0) * 1000;
     } catch (e) {
       return false;
     }

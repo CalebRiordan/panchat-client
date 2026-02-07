@@ -1,0 +1,30 @@
+.toast-wrapper {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+}
+
+.toast-card {
+  padding: 1.2rem 2rem;
+  border-radius: 0.8rem;
+  color: var(--colour-on-background-contrast);
+  display: flex;
+  justify-content: space-between;
+  min-width: 25rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Custom Color Logic */
+.toast-card[data-type='error'] { color: #e74c3c; }
+.toast-card[data-type='success'] { color: #2ecc71; }
+.toast-card[data-type='info'] { color: #3498db; }
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}

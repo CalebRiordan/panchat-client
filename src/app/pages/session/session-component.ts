@@ -1,10 +1,9 @@
-import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { CommonModule } from '@angular/common';
 import { finalize, Observable } from 'rxjs';
-import { setCurrentInjector } from '@angular/core/primitives/di';
 
 @Component({
   selector: 'app-session',

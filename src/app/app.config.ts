@@ -8,6 +8,8 @@ import { routes } from './app.routes';
 import { env } from '../environments/environment';
 import { MessageService } from './services/message.service';
 import { MockMessageService } from './services/message.service.mock';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './interceptors/auth.interceptors';
 
 const useMockData = !env.production;
 
@@ -16,6 +18,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideZonelessChangeDetection(),
+    provideHttpClient(withInterceptors([authInterceptor])),
     { provide: MessageService, useClass: useMockData ? MockMessageService : MessageService },
   ],
 };

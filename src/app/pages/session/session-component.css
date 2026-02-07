@@ -93,7 +93,7 @@ form .button {
     font-weight: bold;
     border-radius: 1.2rem;
     border: none;
-    background-color: var(--colour-on-background);
+    background-color: var(--colour-on-background-contrast);
     color: var(--colour-text);
 }
 
