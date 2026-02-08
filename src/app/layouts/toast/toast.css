@@ -1,30 +1,53 @@
 .toast-wrapper {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  z-index: 9999;
+    position: fixed;
+    bottom: 6rem;
+    right: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    z-index: 9999;
+    min-width: 15%;
+    max-width: 19%;
 }
 
 .toast-card {
-  padding: 1.2rem 2rem;
-  border-radius: 0.8rem;
-  color: var(--colour-on-background-contrast);
-  display: flex;
-  justify-content: space-between;
-  min-width: 25rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  animation: slideIn 0.3s ease-out;
+    padding: 1.5rem 2.2rem;
+    border-radius: 1rem;
+    font-size: 1.6rem;
+    color: var(--colour-on-background);
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    animation: slideIn 0.5s ease-out;
 }
 
-/* Custom Color Logic */
-.toast-card[data-type='error'] { color: #e74c3c; }
-.toast-card[data-type='success'] { color: #2ecc71; }
-.toast-card[data-type='info'] { color: #3498db; }
+.toast-card button {
+    color: var(--colour-text);
+    filter: grayscale(20%);
+    font-size: 2rem;
+}
+
+.toast-card[data-type='error'] {
+    color: #c64133;
+}
+
+.toast-card[data-type='success'] {
+    color: #29b262;
+}
+
+.toast-card[data-type='info'] {
+    color: var(--colour-text);
+}
 
 @keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }

@@ -19,6 +19,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideZonelessChangeDetection(),
     provideHttpClient(withInterceptors([authInterceptor])),
-    { provide: MessageService, useClass: useMockData ? MockMessageService : MessageService },
+    // { provide: MessageService, useClass: useMockData ? MockMessageService : MessageService },
   ],
 };

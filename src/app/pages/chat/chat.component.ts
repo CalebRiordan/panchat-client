@@ -2,6 +2,7 @@ import { Component, effect, ElementRef, OnInit, signal, ViewChild } from '@angul
 import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-chat',
@@ -45,17 +46,24 @@ export class ChatComponent implements OnInit {
     if (this.messages.length == 0) {
       this.messageService.getLatestMessages().subscribe({
         next: (messages) => {
+          console.log(`Retrieved ${messages.length} messages: ${messages}`);
+
           this.messages.set(messages);
         },
         error: (err) => {
           console.error('Error occurred while trying to retrieve messages: ' + err.message);
-          // TODO: Error popup
+          this.toastService.show(
+            'An error occurred trying to fetch message for this account',
+            'error',
+          );
         },
       });
     }
 
     // Listen for new messages
     this.messageService.onIncomingMessage((m: Message) => {
+      console.log("Received message from websocket connection");
+      
       this.messages.update((msgs) => [...msgs, m]);
     });
   }
@@ -93,23 +101,21 @@ export class ChatComponent implements OnInit {
     event?.preventDefault();
 
     if (content) {
-      this.sendingMessage.update(() => true);
-      this.messageService.sendTextMessage(content).subscribe({
-        next: (m: Message) => {
-          this.messages.update((msgs) => [...msgs, m]);
-
-          this.messageInput.nativeElement.style.height = 'auto';
-          this.messageInput.nativeElement.style.overflowY = 'hidden';
-          this.messageInput.nativeElement.value = '';
-        },
-        error: (err) => {
-          console.error(err);
-          this.toastService.show('An error occurred while trying to send the message', 'error');
-        },
-        complete: () => {
-          this.sendingMessage.update(() => false);
-        },
-      });
+      this.sendingMessage.set(true);
+      this.messageService
+        .sendTextMessage(content)
+        .pipe(finalize(() => this.sendingMessage.set(false)))
+        .subscribe({
+          next: () => {
+            this.messageInput.nativeElement.style.height = 'auto';
+            this.messageInput.nativeElement.style.overflowY = 'hidden';
+            this.messageInput.nativeElement.value = '';
+          },
+          error: (err) => {
+            console.error(err);
+            this.toastService.show('An error occurred while trying to send your message', 'error');
+          },
+        });
     }
   }
 }

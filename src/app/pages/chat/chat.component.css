@@ -45,7 +45,7 @@
 }
 
 .no-messages-text {
-    color: var(--colour-on-background);
+    color: var(--colour-on-background-contrast);
     margin-top: 5rem;
     font-size: 2.5rem;
     width: 100%;
