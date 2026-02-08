@@ -25,7 +25,9 @@ export class ChatComponent implements OnInit {
     // Get device ID
     var tempDeviceId = localStorage.getItem('chat_device_id');
     if (!tempDeviceId) {
-      tempDeviceId = crypto.randomUUID();
+      tempDeviceId = crypto.randomUUID
+        ? crypto.randomUUID()
+        : Math.random().toString(36).substring(2, 15);
       localStorage.setItem('chat_device_id', tempDeviceId);
     }
     this.deviceId = tempDeviceId;
@@ -62,8 +64,8 @@ export class ChatComponent implements OnInit {
 
     // Listen for new messages
     this.messageService.onIncomingMessage((m: Message) => {
-      console.log("Received message from websocket connection");
-      
+      console.log('Received message from websocket connection');
+
       this.messages.update((msgs) => [...msgs, m]);
     });
   }
