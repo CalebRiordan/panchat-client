@@ -3,6 +3,7 @@ import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
 import { finalize } from 'rxjs';
+import { generateGuid } from '../../shared/utils';
 
 @Component({
   selector: 'app-chat',
@@ -27,7 +28,7 @@ export class ChatComponent implements OnInit {
     if (!tempDeviceId) {
       tempDeviceId = crypto.randomUUID
         ? crypto.randomUUID()
-        : Math.random().toString(36).substring(2, 15);
+        : generateGuid();
       localStorage.setItem('chat_device_id', tempDeviceId);
     }
     this.deviceId = tempDeviceId;
