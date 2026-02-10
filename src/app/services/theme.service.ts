@@ -16,7 +16,7 @@ export class ThemeService {
     if (theme === 'light') {
       isDarkMode = false;
     } else if (theme !== 'dark') {
-      console.error(`Unknown theme '${theme}'`);
+      localStorage.setItem('theme', 'dark');
     }
 
     this.applyTheme(isDarkMode);
