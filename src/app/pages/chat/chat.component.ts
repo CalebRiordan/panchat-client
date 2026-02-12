@@ -2,7 +2,7 @@ import { Component, effect, ElementRef, OnInit, signal, ViewChild } from '@angul
 import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
-import { finalize } from 'rxjs';
+import { finalize, toArray } from 'rxjs';
 import { generateGuid } from '../../shared/utils';
 
 @Component({
@@ -14,6 +14,7 @@ import { generateGuid } from '../../shared/utils';
 export class ChatComponent implements OnInit {
   messages = signal<Message[]>([]);
   sendingMessage = signal(false);
+  files = signal<File[]>([]);
   deviceId!: string;
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
@@ -26,9 +27,7 @@ export class ChatComponent implements OnInit {
     // Get device ID
     var tempDeviceId = localStorage.getItem('chat_device_id');
     if (!tempDeviceId) {
-      tempDeviceId = crypto.randomUUID
-        ? crypto.randomUUID()
-        : generateGuid();
+      tempDeviceId = crypto.randomUUID ? crypto.randomUUID() : generateGuid();
       localStorage.setItem('chat_device_id', tempDeviceId);
     }
     this.deviceId = tempDeviceId;
@@ -119,6 +118,25 @@ export class ChatComponent implements OnInit {
             this.toastService.show('An error occurred while trying to send your message', 'error');
           },
         });
+    }
+  }
+
+  onFilesSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const files = input.files;
+    if (files && files.length > 0) {
+      if (files.length > 15) {
+        // alert maximum 15 images
+        return;
+      }
+
+      const uploadSize = Array.from(files).reduce((acc: number, file: File) => acc + file.size, 0);
+      if (uploadSize > 20 * 1024 * 1024) {
+        // alert maximum 20MB file upload
+        return;
+      }
+
+      this.files.set(Array.from(files));
     }
   }
 }
