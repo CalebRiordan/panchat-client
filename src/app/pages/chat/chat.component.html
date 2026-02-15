@@ -1,6 +1,7 @@
 <!-- Add navbar here in future -->
 
 <div class="chat-container">
+    <!-- ================ Display messages ================ -->
     <div class="messages-container" #messagesContainer>
         @for (message of messages(); track message.id; let i = $index){
         @if (message.deviceId == deviceId){
@@ -16,11 +17,23 @@
     </div>
 
     <div class="create-message-controls">
+        <!-- ================ Files preview ================ -->
+        <div class="files-container">
+            @for(preview of filePreviews(); track preview.id){
+            <!-- Display loaded preview -->
+            }
+
+            @for(placeholder of filePlaceholders(); track placeholder.id){
+            <!-- Show placeholder -->
+            }
+        </div>
+
+        <!-- ================ Create message textbox ================ -->
         <div class="text-box" [class.disabled]="sendingMessage()">
             <span class="add-attachment-icon"><i class="fa-solid fa-plus"></i></span>
             <textarea class="content" placeholder="Message" spellcheck="true" #messageInput rows="1"
                 (input)="adjustHeight(messageInput)" (keydown.enter)="onSend($event)"></textarea>
-            <span class="add-image-icon"><i class="fa-solid fa-images"></i></span>
+            <span class="add-image-icon"><i class="fa-solid fa-images" (click)="fileInput.click()"></i></span>
         </div>
         <button class="btn-send-message" [disabled]="!messageInput.value.trim() || sendingMessage()" (click)="onSend()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
@@ -30,4 +43,6 @@
         </button>
     </div>
 
+    <!-- Hidden file input -->
+    <input hidden type="file" #fileInput accept="image/*" multiple (change)="onFilesSelected($event)">
 </div>
