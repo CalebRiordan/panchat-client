@@ -1,4 +1,4 @@
-import { Component, effect, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
 import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
@@ -9,6 +9,7 @@ interface FilePreview {
   id: number;
   filename: string;
   content: string;
+  file: File;
 }
 
 @Component({
@@ -20,19 +21,16 @@ interface FilePreview {
 export class ChatComponent implements OnInit {
   messages = signal<Message[]>([]);
   sendingMessage = signal(false);
-  filesCount = signal(0);
   filePlaceholders = signal<FilePreview[]>([]);
-  filePreviews = signal<FilePreview[]>([]);
-  files: File[] = [];
+  readyFiles = signal<FilePreview[]>([]);
+  files: FilePreview[] = [];
   deviceId!: string;
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   @ViewChild('messageInput') private messageInput!: ElementRef;
+  @ViewChild('filesContainer') private filesContainer!: ElementRef;
 
-  constructor(
-    private messageService: MessageService,
-    private toastService: ToastService,
-  ) {
+  constructor(private messageService: MessageService, private toastService: ToastService) {
     // Get device ID
     var tempDeviceId = localStorage.getItem('chat_device_id');
     if (!tempDeviceId) {
@@ -51,18 +49,8 @@ export class ChatComponent implements OnInit {
       }
     });
 
-    effect(() => {
-      const placeholdersCount = this.filesCount() - this.filePreviews().length;
-      const newPlaceholders: FilePreview[] = [];
-      this.files.slice(-placeholdersCount).forEach((file) => {
-        const placeholder: FilePreview = {
-          id: 0, //TODO: Arrach file IDs to this.files array when selected
-          filename: file.name,
-          content: '',
-        };
-        newPlaceholders.push(placeholder);
-      });
-      this.filePlaceholders.set(newPlaceholders);
+    this.filePlaceholders = computed(() => {
+      return this.files.slice(this.readyFiles().length)
     });
   }
 
@@ -79,7 +67,7 @@ export class ChatComponent implements OnInit {
           console.error('Error occurred while trying to retrieve messages: ' + err.message);
           this.toastService.show(
             'An error occurred trying to fetch message for this account',
-            'error',
+            'error'
           );
         },
       });
@@ -146,34 +134,50 @@ export class ChatComponent implements OnInit {
 
   onFilesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    this.files = Array.from(input.files ?? []);
+
+    // Create FilePreview list
+    this.files = Array.from(input.files ?? [], (file) => {
+      return {
+        id: Date.now() + Math.random(),
+        filename: file.name,
+        file: file,
+        content: '',
+      };
+    });
+
+    console.log(`${this.files.length} files selected`);
+
     if (this.files && this.files.length > 0) {
+      // Max files error
       if (this.files.length > 15) {
         // alert maximum 15 images
         return;
       }
 
-      const uploadSize = this.files.reduce((acc: number, file: File) => acc + file.size, 0);
+      // Max upload size error
+      const uploadSize = this.files.reduce(
+        (acc: number, preview: FilePreview) => acc + preview.file.size,
+        0
+      );
       if (uploadSize > 20 * 1024 * 1024) {
         // alert maximum 20MB file upload
         return;
       }
 
-      this.filesCount.set(this.files.length);
-
-      this.files.forEach((file) => {
+      this.files.forEach((preview) => {
         const reader = new FileReader();
+
+        // Update previews when file is successfully read
         reader.onload = (e) => {
-          const newPreview: FilePreview = {
-            id: Date.now() + Math.random(),
-            filename: file.name,
-            content: e.target?.result as string,
-          };
-          // When file loads, update filePreviews signal
-          this.filePreviews.update((previews) => [...previews, newPreview]);
+          preview.content = e.target?.result as string;
+          console.log(`File '${preview.filename}' loaded`);
+
+          this.readyFiles.update((previews) =>
+            [...previews, preview].sort((a, b) => a.filename.localeCompare(b.filename))
+          );
         };
 
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(preview.file);
       });
     }
   }

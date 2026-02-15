@@ -65,13 +65,30 @@
     background-color: var(--colour-on-background);
     width: calc(100% - 6rem - 1rem);
     height: 15rem;
+    padding: 1rem;
+    box-sizing: border-box;
     border: 0.2px solid var(--colour-on-background-contrast);
     border-radius: 2rem;
     display: flex;
     justify-content: start;
-    gap: 2.5rem;
+    gap: 1.5rem;
     bottom: 120%;
-    display: none;
+}
+
+.file-preview {
+    background-color: var(--colour-text);
+    border: 1px solid var(--colour-background-variant);
+    border-radius: 2rem;
+    height: 100%;
+    aspect-ratio: 3/4;
+}
+
+.file-placeholder {
+    background-color: var(--colour-background);
+    border: 1px solid var(--colour-background-variant);
+    border-radius: 2rem;
+    height: 100%;
+    aspect-ratio: 3/4;
 }
 
 .text-box {
