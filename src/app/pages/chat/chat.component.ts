@@ -5,6 +5,12 @@ import { ToastService } from '../../services/toast.service';
 import { finalize, toArray } from 'rxjs';
 import { generateGuid } from '../../shared/utils';
 
+interface FilePreview {
+  id: number;
+  filename: string;
+  content: string;
+}
+
 @Component({
   selector: 'app-chat',
   imports: [],
@@ -14,7 +20,10 @@ import { generateGuid } from '../../shared/utils';
 export class ChatComponent implements OnInit {
   messages = signal<Message[]>([]);
   sendingMessage = signal(false);
-  files = signal<File[]>([]);
+  filesCount = signal(0);
+  filePlaceholders = signal<FilePreview[]>([]);
+  filePreviews = signal<FilePreview[]>([]);
+  files: File[] = [];
   deviceId!: string;
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
@@ -40,6 +49,20 @@ export class ChatComponent implements OnInit {
       if (currentMessages.length > 0) {
         setTimeout(() => this.scrollToBottom(), 100);
       }
+    });
+
+    effect(() => {
+      const placeholdersCount = this.filesCount() - this.filePreviews().length;
+      const newPlaceholders: FilePreview[] = [];
+      this.files.slice(-placeholdersCount).forEach((file) => {
+        const placeholder: FilePreview = {
+          id: 0, //TODO: Arrach file IDs to this.files array when selected
+          filename: file.name,
+          content: '',
+        };
+        newPlaceholders.push(placeholder);
+      });
+      this.filePlaceholders.set(newPlaceholders);
     });
   }
 
@@ -123,20 +146,35 @@ export class ChatComponent implements OnInit {
 
   onFilesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    const files = input.files;
-    if (files && files.length > 0) {
-      if (files.length > 15) {
+    this.files = Array.from(input.files ?? []);
+    if (this.files && this.files.length > 0) {
+      if (this.files.length > 15) {
         // alert maximum 15 images
         return;
       }
 
-      const uploadSize = Array.from(files).reduce((acc: number, file: File) => acc + file.size, 0);
+      const uploadSize = this.files.reduce((acc: number, file: File) => acc + file.size, 0);
       if (uploadSize > 20 * 1024 * 1024) {
         // alert maximum 20MB file upload
         return;
       }
 
-      this.files.set(Array.from(files));
+      this.filesCount.set(this.files.length);
+
+      this.files.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const newPreview: FilePreview = {
+            id: Date.now() + Math.random(),
+            filename: file.name,
+            content: e.target?.result as string,
+          };
+          // When file loads, update filePreviews signal
+          this.filePreviews.update((previews) => [...previews, newPreview]);
+        };
+
+        reader.readAsDataURL(file);
+      });
     }
   }
 }
