@@ -18,14 +18,16 @@
 
     <div class="create-message-controls">
         <!-- ================ Files preview ================ -->
-        <div #filesContainer class="files-container"
-            [hidden]="readyFiles().length == 0 && filePlaceholders().length == 0">
-            @for(preview of readyFiles(); track preview.id){
-            <div class="file-preview"></div>
-            }
+        <div #filesContainer class="files-container" [hidden]="files().length == 0">
+            @for(preview of files(); track preview.url){
+            <div class="file-preview" [class.loading]="!preview.loaded">
+                @if(!preview.loaded){
+                <span class="preview-loader"></span>
+                }
 
-            @for(placeholder of filePlaceholders(); track placeholder.id){
-            <div class="file-placeholder"></div>
+                <img [src]="preview.url" [alt]="preview.filename" (load)="onImageLoad(preview.id)"
+                    [style.display]="preview.loaded ? 'block' : 'none'">
+            </div>
             }
         </div>
 

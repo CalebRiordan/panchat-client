@@ -1,4 +1,13 @@
-import { Component, computed, effect, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
@@ -8,8 +17,9 @@ import { generateGuid } from '../../shared/utils';
 interface FilePreview {
   id: number;
   filename: string;
-  content: string;
+  url: string;
   file: File;
+  loaded: Boolean;
 }
 
 @Component({
@@ -18,19 +28,20 @@ interface FilePreview {
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent implements OnInit, OnDestroy {
   messages = signal<Message[]>([]);
   sendingMessage = signal(false);
-  filePlaceholders = signal<FilePreview[]>([]);
-  readyFiles = signal<FilePreview[]>([]);
-  files: FilePreview[] = [];
+  files = signal<FilePreview[]>([]);
   deviceId!: string;
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   @ViewChild('messageInput') private messageInput!: ElementRef;
   @ViewChild('filesContainer') private filesContainer!: ElementRef;
 
-  constructor(private messageService: MessageService, private toastService: ToastService) {
+  constructor(
+    private messageService: MessageService,
+    private toastService: ToastService,
+  ) {
     // Get device ID
     var tempDeviceId = localStorage.getItem('chat_device_id');
     if (!tempDeviceId) {
@@ -48,10 +59,10 @@ export class ChatComponent implements OnInit {
         setTimeout(() => this.scrollToBottom(), 100);
       }
     });
+  }
 
-    this.filePlaceholders = computed(() => {
-      return this.files.slice(this.readyFiles().length)
-    });
+  ngOnDestroy(): void {
+    throw new Error('Method not implemented.');
   }
 
   ngOnInit(): void {
@@ -67,7 +78,7 @@ export class ChatComponent implements OnInit {
           console.error('Error occurred while trying to retrieve messages: ' + err.message);
           this.toastService.show(
             'An error occurred trying to fetch message for this account',
-            'error'
+            'error',
           );
         },
       });
@@ -136,49 +147,42 @@ export class ChatComponent implements OnInit {
     const input = event.target as HTMLInputElement;
 
     // Create FilePreview list
-    this.files = Array.from(input.files ?? [], (file) => {
-      return {
-        id: Date.now() + Math.random(),
-        filename: file.name,
-        file: file,
-        content: '',
-      };
-    });
+    this.files.set(
+      Array.from(input.files ?? [], (file) => {
+        return {
+          id: Date.now() + Math.random(),
+          filename: file.name,
+          file: file,
+          url: URL.createObjectURL(file),
+          loaded: false,
+        };
+      }),
+    );
 
-    console.log(`${this.files.length} files selected`);
+    console.log(`${this.files().length} files selected`);
 
-    if (this.files && this.files.length > 0) {
+    if (this.files() && this.files().length > 0) {
       // Max files error
-      if (this.files.length > 15) {
+      if (this.files().length > 15) {
         // alert maximum 15 images
         return;
       }
 
       // Max upload size error
-      const uploadSize = this.files.reduce(
+      const uploadSize = this.files().reduce(
         (acc: number, preview: FilePreview) => acc + preview.file.size,
-        0
+        0,
       );
       if (uploadSize > 20 * 1024 * 1024) {
         // alert maximum 20MB file upload
         return;
       }
-
-      this.files.forEach((preview) => {
-        const reader = new FileReader();
-
-        // Update previews when file is successfully read
-        reader.onload = (e) => {
-          preview.content = e.target?.result as string;
-          console.log(`File '${preview.filename}' loaded`);
-
-          this.readyFiles.update((previews) =>
-            [...previews, preview].sort((a, b) => a.filename.localeCompare(b.filename))
-          );
-        };
-
-        reader.readAsDataURL(preview.file);
-      });
     }
+  }
+
+  onImageLoad(id: number) {
+    this.files.update((currentFiles) =>
+      currentFiles.map((file) => (file.id === id ? { ...file, loaded: true } : file)),
+    );
   }
 }
