@@ -13,6 +13,7 @@ import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
 import { finalize, toArray } from 'rxjs';
 import { generateGuid } from '../../shared/utils';
+import heic2any from 'heic2any';
 
 interface FilePreview {
   id: number;
@@ -143,21 +144,40 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
   }
 
-  onFilesSelected(event: Event) {
+  async onFilesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
+    const previews = Array.from(input.files ?? [], (file) => {
+      return {
+        id: Date.now() + Math.random(),
+        filename: file.name,
+        file: file,
+        url: '',
+        loaded: false,
+      };
+    });
 
-    // Create FilePreview list
-    this.files.set(
-      Array.from(input.files ?? [], (file) => {
-        return {
-          id: Date.now() + Math.random(),
-          filename: file.name,
-          file: file,
-          url: URL.createObjectURL(file),
-          loaded: false,
-        };
+
+    this.files.set(previews);
+
+    // Convert Files to FilePreviews
+    const previewsWithUrls = await Promise.all(
+      previews.map(async (preview) => {
+        if (
+          preview.file.type === 'image/heic' ||
+          preview.file.name.toLowerCase().endsWith('.heic')
+        ) {
+          // Update file.url
+          preview.url = await this.heicToFilePreview(preview.file);
+          return preview;
+        } else {
+          // NOT ASYNC - room for optimization?
+          preview.url = URL.createObjectURL(preview.file);
+          return preview;
+        }
       }),
     );
+
+    this.files.set(previewsWithUrls);
 
     console.log(`${this.files().length} files selected`);
 
@@ -184,5 +204,17 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.files.update((currentFiles) =>
       currentFiles.map((file) => (file.id === id ? { ...file, loaded: true } : file)),
     );
+  }
+
+  private async heicToFilePreview(file: File): Promise<string> {
+    // Convert any HEIC images to JPG
+    const blobArray = await heic2any({
+      blob: file,
+      toType: 'image/jpeg',
+      quality: 0.6,
+    });
+
+    const jpgBlob = Array.isArray(blobArray) ? blobArray[0] : blobArray;
+    return URL.createObjectURL(jpgBlob);
   }
 }
