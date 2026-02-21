@@ -1,19 +1,9 @@
-import {
-  Component,
-  computed,
-  effect,
-  ElementRef,
-  OnDestroy,
-  OnInit,
-  signal,
-  ViewChild,
-} from '@angular/core';
+import { Component, effect, ElementRef, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
-import { finalize, toArray } from 'rxjs';
-import { generateGuid } from '../../shared/utils';
-import heic2any from 'heic2any';
+import { finalize } from 'rxjs';
+import { generateGuid, getUrlFromHeic, getUrlFromPdf } from '../../shared/utils';
 
 interface FilePreview {
   id: number;
@@ -22,6 +12,16 @@ interface FilePreview {
   file: File;
   loaded: Boolean;
 }
+
+const allowedTypes = [
+  'image/png',
+  'image/jpeg',
+  'image/heic',
+  'image/webp',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
 
 @Component({
   selector: 'app-chat',
@@ -33,6 +33,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   messages = signal<Message[]>([]);
   sendingMessage = signal(false);
   files = signal<FilePreview[]>([]);
+  uploadSize = 0;
   deviceId!: string;
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
@@ -145,76 +146,108 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   async onFilesSelected(event: Event) {
+    console.log('onFilesSelected');
     const input = event.target as HTMLInputElement;
-    const previews = Array.from(input.files ?? [], (file) => {
-      return {
-        id: Date.now() + Math.random(),
-        filename: file.name,
-        file: file,
-        url: '',
-        loaded: false,
-      };
-    });
 
+    // Create preview objects with empty URL
+    const previews = Array.from(input.files ?? []).map((file) => ({
+      id: Date.now() + Math.random(),
+      filename: file.name,
+      file: file,
+      url: '',
+      loaded: false,
+    }));
 
-    this.files.set(previews);
+    console.log(previews);
 
-    // Convert Files to FilePreviews
-    const previewsWithUrls = await Promise.all(
-      previews.map(async (preview) => {
-        if (
-          preview.file.type === 'image/heic' ||
-          preview.file.name.toLowerCase().endsWith('.heic')
-        ) {
-          // Update file.url
-          preview.url = await this.heicToFilePreview(preview.file);
-          return preview;
-        } else {
-          // NOT ASYNC - room for optimization?
-          preview.url = URL.createObjectURL(preview.file);
-          return preview;
-        }
-      }),
-    );
-
-    this.files.set(previewsWithUrls);
-
-    console.log(`${this.files().length} files selected`);
-
-    if (this.files() && this.files().length > 0) {
+    // ========================================
+    // =========== Validate files =============
+    // ========================================
+    if (previews && previews.length > 0) {
       // Max files error
-      if (this.files().length > 15) {
+      if (this.files().length + previews.length > 15) {
         // alert maximum 15 images
+
+        console.error('Exceeds max files');
         return;
       }
 
-      // Max upload size error
-      const uploadSize = this.files().reduce(
+      // Max upload size error (20MB)
+      const additionalUploadsSize = this.files().reduce(
         (acc: number, preview: FilePreview) => acc + preview.file.size,
         0,
       );
-      if (uploadSize > 20 * 1024 * 1024) {
+      if (this.uploadSize + additionalUploadsSize > 20 * 1024 * 1024) {
         // alert maximum 20MB file upload
+
+        console.error('Exceeds max upload size');
+        return;
+      }
+
+      console.log('Checking for unsupported types');
+      // Unsupported file type error
+      let invalidIds = [];
+      previews.filter((preview) => {
+        const type = preview.file.type;
+        const isWordDoc =
+          type === 'application/msword' ||
+          type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+          preview.file.name.toLowerCase().endsWith('.docx') ||
+          preview.file.name.toLowerCase().endsWith('.doc');
+
+        if (allowedTypes.includes(type) || isWordDoc) {
+          return true;
+        }
+
+        console.log(`File with name ${preview.filename} is unsupported`);
+        invalidIds.push(preview.id);
+        return false;
+      });
+
+      if (invalidIds.length == 1) {
+        // alert file ${name} is of unsupported type ${type}
+        return;
+      } else if (invalidIds.length > 1) {
+        // alert ${invalidIds.length} files of unsupported formats
         return;
       }
     }
+
+    console.log('Passed validation');
+
+    const preexisting = this.files();
+    this.files.set([...preexisting, ...previews]);
+
+    console.log('Updated files signal');
+
+    // ========================================
+    // ====== Convert files to previews =======
+    // ========================================
+    const previewsWithUrls = await Promise.all(
+      previews.map(async (p) => {
+        if (p.file.type === 'image/heic' || p.filename.toLowerCase().endsWith('.heic')) {
+          p.url = await getUrlFromHeic(p.file);
+        } else if (p.file.type === 'application/pdf' || p.filename.toLowerCase().endsWith('.pdf')) {
+          p.url = await getUrlFromPdf(p.file);
+        } else {
+          // NOT ASYNC - room for optimization?
+          p.url = URL.createObjectURL(p.file);
+        }
+
+        return p;
+      }),
+    );
+
+    console.log('Added URLs');
+
+    // Replace existing file previews with new ones with URLs
+    this.files.set([...preexisting, ...previewsWithUrls]);
+    console.log(`${this.files().length} files selected`);
   }
 
   onImageLoad(id: number) {
     this.files.update((currentFiles) =>
       currentFiles.map((file) => (file.id === id ? { ...file, loaded: true } : file)),
     );
-  }
-
-  private async heicToFilePreview(file: File): Promise<string> {
-    // Convert any HEIC images to JPG
-    const blobArray = await heic2any({
-      blob: file,
-      toType: 'image/jpeg',
-      quality: 0.6,
-    });
-
-    const jpgBlob = Array.isArray(blobArray) ? blobArray[0] : blobArray;
-    return URL.createObjectURL(jpgBlob);
   }
 }

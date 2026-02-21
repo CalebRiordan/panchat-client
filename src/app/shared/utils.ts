@@ -1,7 +1,56 @@
+import heic2any from 'heic2any';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Point to the worker on a CDN so your main bundle stays small
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
 export function generateGuid() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+export async function getUrlFromPdf(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer();
+
+  // Load the document and get first page
+  const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+  const pdf = await loadingTask.promise;
+  const page = await pdf.getPage(1);
+  const viewport = page.getViewport({ scale: 0.5 });
+
+  // Create an off-screen canvas to draw the page
+  const canvas = document.createElement('canvas');
+  const canvasContext = canvas.getContext('2d');
+  canvas.height = viewport.height;
+  canvas.width = viewport.width;
+
+  if (canvasContext) {
+    await page.render({ canvas, canvasContext, viewport }).promise;
+
+    // Turn that canvas into a Base64 image string
+    const result = canvas.toDataURL('image/jpeg', 0.8);
+
+    // Clean up to save memory
+    pdf.destroy();
+
+    return result;
+  }
+
+  return '';
+}
+
+export async function getUrlFromHeic(file: File): Promise<string> {
+  // Convert any HEIC images to JPG
+  const blobArray = await heic2any({
+    blob: file,
+    toType: 'image/jpeg',
+    quality: 0.6,
+  });
+
+  const jpgBlob = Array.isArray(blobArray) ? blobArray[0] : blobArray;
+  return URL.createObjectURL(jpgBlob);
 }
