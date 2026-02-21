@@ -1,9 +1,9 @@
-import heic2any from 'heic2any';
+import { heicTo } from 'heic-to';
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Point to the worker on a CDN so your main bundle stays small
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const pdfjsVersion = pdfjsLib.version;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 export function generateGuid() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -18,7 +18,9 @@ export async function getUrlFromPdf(file: File): Promise<string> {
 
   // Load the document and get first page
   const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+
   const pdf = await loadingTask.promise;
+
   const page = await pdf.getPage(1);
   const viewport = page.getViewport({ scale: 0.5 });
 
@@ -45,9 +47,9 @@ export async function getUrlFromPdf(file: File): Promise<string> {
 
 export async function getUrlFromHeic(file: File): Promise<string> {
   // Convert any HEIC images to JPG
-  const blobArray = await heic2any({
+  const blobArray = await heicTo({
     blob: file,
-    toType: 'image/jpeg',
+    type: 'image/jpeg',
     quality: 0.6,
   });
 

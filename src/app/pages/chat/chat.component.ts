@@ -4,6 +4,7 @@ import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
 import { finalize } from 'rxjs';
 import { generateGuid, getUrlFromHeic, getUrlFromPdf } from '../../shared/utils';
+import { isHeic } from 'heic-to';
 
 interface FilePreview {
   id: number;
@@ -35,6 +36,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   files = signal<FilePreview[]>([]);
   uploadSize = 0;
   deviceId!: string;
+  filesReady = signal(false);
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   @ViewChild('messageInput') private messageInput!: ElementRef;
@@ -146,7 +148,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   async onFilesSelected(event: Event) {
-    console.log('onFilesSelected');
     const input = event.target as HTMLInputElement;
 
     // Create preview objects with empty URL
@@ -158,8 +159,6 @@ export class ChatComponent implements OnInit, OnDestroy {
       loaded: false,
     }));
 
-    console.log(previews);
-
     // ========================================
     // =========== Validate files =============
     // ========================================
@@ -168,7 +167,6 @@ export class ChatComponent implements OnInit, OnDestroy {
       if (this.files().length + previews.length > 15) {
         // alert maximum 15 images
 
-        console.error('Exceeds max files');
         return;
       }
 
@@ -180,11 +178,9 @@ export class ChatComponent implements OnInit, OnDestroy {
       if (this.uploadSize + additionalUploadsSize > 20 * 1024 * 1024) {
         // alert maximum 20MB file upload
 
-        console.error('Exceeds max upload size');
         return;
       }
 
-      console.log('Checking for unsupported types');
       // Unsupported file type error
       let invalidIds = [];
       previews.filter((preview) => {
@@ -192,14 +188,14 @@ export class ChatComponent implements OnInit, OnDestroy {
         const isWordDoc =
           type === 'application/msword' ||
           type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-          preview.file.name.toLowerCase().endsWith('.docx') ||
-          preview.file.name.toLowerCase().endsWith('.doc');
+          this.extensionIs('docx', preview) ||
+          this.extensionIs('doc', preview);
+        const isHeic = type === 'image/heic' || this.extensionIs('heic', preview);
 
-        if (allowedTypes.includes(type) || isWordDoc) {
+        if (allowedTypes.includes(type) || isWordDoc || isHeic) {
           return true;
         }
 
-        console.log(`File with name ${preview.filename} is unsupported`);
         invalidIds.push(preview.id);
         return false;
       });
@@ -213,21 +209,20 @@ export class ChatComponent implements OnInit, OnDestroy {
       }
     }
 
-    console.log('Passed validation');
-
+    this.filesReady.set(false);
     const preexisting = this.files();
     this.files.set([...preexisting, ...previews]);
-
-    console.log('Updated files signal');
 
     // ========================================
     // ====== Convert files to previews =======
     // ========================================
     const previewsWithUrls = await Promise.all(
       previews.map(async (p) => {
-        if (p.file.type === 'image/heic' || p.filename.toLowerCase().endsWith('.heic')) {
+        const isPdf = p.file.type === 'application/pdf' || this.extensionIs('pdf', p);
+
+        if (await isHeic(p.file)) {
           p.url = await getUrlFromHeic(p.file);
-        } else if (p.file.type === 'application/pdf' || p.filename.toLowerCase().endsWith('.pdf')) {
+        } else if (isPdf) {
           p.url = await getUrlFromPdf(p.file);
         } else {
           // NOT ASYNC - room for optimization?
@@ -238,9 +233,8 @@ export class ChatComponent implements OnInit, OnDestroy {
       }),
     );
 
-    console.log('Added URLs');
-
     // Replace existing file previews with new ones with URLs
+    this.filesReady.set(true);
     this.files.set([...preexisting, ...previewsWithUrls]);
     console.log(`${this.files().length} files selected`);
   }
@@ -249,5 +243,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.files.update((currentFiles) =>
       currentFiles.map((file) => (file.id === id ? { ...file, loaded: true } : file)),
     );
+  }
+
+  onRemoveFile(id: number) {
+    this.files.update((current) => current.filter((p) => p.id != id));
+  }
+
+  private extensionIs(extension: string, preview: FilePreview) {
+    return preview.filename.toLowerCase().endsWith(`.${extension}`);
   }
 }

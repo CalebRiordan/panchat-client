@@ -64,7 +64,7 @@
     position: absolute;
     background-color: var(--colour-on-background);
     width: calc(100% - 6rem - 1rem);
-    height: 15rem;
+    height: 18rem;
     padding: 1rem;
     box-sizing: border-box;
     border: 0.2px solid var(--colour-on-background-contrast);
@@ -73,18 +73,22 @@
     justify-content: start;
     gap: 1.5rem;
     bottom: 120%;
+    overflow-x: scroll;
 }
 
 .file-preview {
     background-color: var(--colour-text);
+    position: relative;
     border: 1px solid var(--colour-background-variant);
     border-radius: 2rem;
     height: 100%;
     aspect-ratio: 3/4;
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    user-select: none;
 }
 
 .file-preview img {
@@ -106,6 +110,52 @@
     display: inline-block;
     box-sizing: border-box;
     animation: rotation 1s linear infinite;
+}
+
+.btn-remove-preview,
+.preview-name-strip {
+    display: none;
+}
+
+.file-preview:hover .btn-remove-preview {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0.8rem;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: var(--colour-background-variant);
+    color: var(--colour-text);
+    opacity: 0.8;
+    display: flex;
+    font-size: 1.5rem;
+    line-height: 1.6rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.file-preview:hover .preview-name-strip {
+    position: absolute;
+    top: 65%;
+    left: 0;
+    height: fit-content;
+    width: 100%;
+    padding: 0.1rem 0.3rem 0.1rem 0.1rem;
+    font-size: 1.5rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    background-color: var(--colour-background-variant);
+    color: var(--colour-text);
+    opacity: 0.8;
+    display: block;
+    user-select: text;
+}
+
+.btn-remove-preview:hover {
+    filter: brightness(1.2);
+    cursor: pointer;
 }
 
 .text-box {
@@ -134,10 +184,6 @@
     color: var(--colour-text);
 }
 
-.add-attachment-icon i {
-    font-size: 3rem;
-}
-
 .text-box .content {
     flex-grow: 1;
     font-size: 2rem;
@@ -157,7 +203,8 @@
 }
 
 .text-box .add-image-icon i {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
+    margin-top: -10%;
 }
 
 .btn-send-message {
