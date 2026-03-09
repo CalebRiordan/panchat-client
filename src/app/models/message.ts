@@ -1,16 +1,17 @@
+import { Attachment, AttachmentInfo } from "./attachment";
+
 export interface Message {
   id: string;
   deviceId: string;
   userId: string;
-  content: string;
-  contentType: string;
+  text?: string;
   dateTimeSent: Date;
-  queueOrder?: Number;
+  attachments: AttachmentInfo[];
 }
 
 export interface CreateMessageModel {
   deviceId: string;
-  content: string;
+  text?: string;
   dateTimeSent: Date;
-  queueOrder?: Number;
+  attachments?: Attachment[];
 }

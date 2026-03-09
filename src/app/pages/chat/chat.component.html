@@ -4,15 +4,21 @@
     <!-- ================ Display messages ================ -->
     <div class="messages-container" #messagesContainer>
         @for (message of messages(); track message.id; let i = $index){
-        @if (message.deviceId == deviceId){
-        <div class="message-box local-message" [class.same-device]="messages()[i-1]?.deviceId == message.deviceId">{{
-            message.content }}</div>
-        } @else {
-        <div class="message-box foreign-message" [class.same-device]="messages()[i-1]?.deviceId == message.deviceId">{{
-            message.content }}</div>
-        }
+        <div class="message-box" [class]="{
+            'local-message': message.deviceId == deviceId,
+            'foreign-message': message.deviceId != deviceId,
+            'same-device': messages()[i-1]?.deviceId == message.deviceId
+        }">
+            {{message.text }}
+        </div>
         } @empty {
+        @if (firstFetch()){
+        <div class="loading-container">
+            <span class="loading-text">Fetching messages</span>
+            <span class="dot-pulse"></span>
+        </div>} @else {
         <div class="no-messages-text">There are no messages on this chat yet</div>
+        }
         }
     </div>
 
@@ -41,8 +47,8 @@
             <span class="add-image-icon">
                 <i class="fa-solid fa-paperclip" (click)="fileInput.click()"></i></span>
         </div>
-        <button class="btn-send-message"
-            [disabled]="(!messageInput.value.trim() && !filesReady()) || sendingMessage()" (click)="onSend()">
+        <button class="btn-send-message" [disabled]="(!messageInput.value.trim() && !filesReady()) || sendingMessage()"
+            (click)="onSend()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
                 <path
                     d="M568.4 37.7C578.2 34.2 589 36.7 596.4 44C603.8 51.3 606.2 62.2 602.7 72L424.7 568.9C419.7 582.8 406.6 592 391.9 592C377.7 592 364.9 583.4 359.6 570.3L295.4 412.3C290.9 401.3 292.9 388.7 300.6 379.7L395.1 267.3C400.2 261.2 399.8 252.3 394.2 246.7C388.6 241.1 379.6 240.7 373.6 245.8L261.2 340.1C252.1 347.7 239.6 349.7 228.6 345.3L70.1 280.8C57 275.5 48.4 262.7 48.4 248.5C48.4 233.8 57.6 220.7 71.5 215.7L568.4 37.7z" />

@@ -44,6 +44,39 @@
     margin-top: 0.8rem;
 }
 
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.2rem;
+  height: 100%;
+  color: var(--colour-on-background-contrast);
+  font-family: sans-serif;
+}
+
+.loading-text {
+  animation: pulse 1.5s infinite ease-in-out;
+  font-size: 3rem;
+}
+
+/* The three jumping dots effect */
+.dot-pulse::after {
+  font-size: 3rem;
+  content: '...';
+  animation: dots 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes dots {
+  0% { content: '.'; }
+  33% { content: '..'; }
+  66% { content: '...'; }
+}
+
 .no-messages-text {
     color: var(--colour-on-background-contrast);
     margin-top: 5rem;

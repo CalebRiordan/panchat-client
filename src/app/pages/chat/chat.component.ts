@@ -32,6 +32,7 @@ const allowedTypes = [
 })
 export class ChatComponent implements OnInit, OnDestroy {
   messages = signal<Message[]>([]);
+  firstFetch = signal(true);
   sendingMessage = signal(false);
   files = signal<FilePreview[]>([]);
   uploadSize = 0;
@@ -71,6 +72,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Retrieve all messages
+    setTimeout(() => {}, 8000);
     if (this.messages.length == 0) {
       this.messageService.getLatestMessages().subscribe({
         next: (messages) => {
@@ -85,6 +87,7 @@ export class ChatComponent implements OnInit, OnDestroy {
             'error',
           );
         },
+        complete: () => this.firstFetch.set(false),
       });
     }
 
@@ -125,13 +128,15 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   onSend(event?: Event) {
-    const content = this.messageInput.nativeElement.value;
+    const text = this.messageInput.nativeElement.value;
     event?.preventDefault();
 
-    if (content) {
+    if (text || this.files().length > 0) {
+      const files = this.files().map((fp) => fp.file);
       this.sendingMessage.set(true);
+
       this.messageService
-        .sendTextMessage(content)
+        .pushMessage(text ?? null, files)
         .pipe(finalize(() => this.sendingMessage.set(false)))
         .subscribe({
           next: () => {
