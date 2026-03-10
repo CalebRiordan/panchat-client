@@ -21,29 +21,6 @@
     scrollbar-color: var(--colour-on-background-contrast) var(--colour-background-variant);
 }
 
-.message-box {
-    padding: 2rem;
-    margin-top: 3rem;
-    background-color: var(--colour-on-background-contrast);
-    border-radius: 0 1rem 1rem 1rem;
-    width: fit-content;
-    max-width: 75%;
-    font-size: 1.8rem;
-    color: var(--colour-text);
-    border: none;
-    box-shadow: 2px 2px 4px var(--colour-background-variant);
-}
-
-.message-box.local-message {
-    align-self: flex-end;
-    background-color: var(--colour-on-background);
-    border-radius: 1rem 0 1rem 1rem;
-}
-
-.message-box.same-device {
-    margin-top: 0.8rem;
-}
-
 .loading-container {
   display: flex;
   justify-content: center;

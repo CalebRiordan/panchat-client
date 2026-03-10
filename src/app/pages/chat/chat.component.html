@@ -4,13 +4,8 @@
     <!-- ================ Display messages ================ -->
     <div class="messages-container" #messagesContainer>
         @for (message of messages(); track message.id; let i = $index){
-        <div class="message-box" [class]="{
-            'local-message': message.deviceId == deviceId,
-            'foreign-message': message.deviceId != deviceId,
-            'same-device': messages()[i-1]?.deviceId == message.deviceId
-        }">
-            {{message.text }}
-        </div>
+        <app-message-box [message]="message" [sameDeviceAsPrevious]="messages()[i-1]?.deviceId == message.deviceId">
+        </app-message-box>
         } @empty {
         @if (firstFetch()){
         <div class="loading-container">

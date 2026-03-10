@@ -1,0 +1,47 @@
+.message-box {
+    padding: 2rem;
+    margin-top: 3rem;
+    background-color: var(--colour-on-background-contrast);
+    border-radius: 0 1rem 1rem 1rem;
+    width: fit-content;
+    max-width: 75%;
+    font-size: 1.8rem;
+    color: var(--colour-text);
+    border: none;
+    box-shadow: 2px 2px 4px var(--colour-background-variant);
+}
+
+.message-box.local-message {
+    align-self: flex-end;
+    background-color: var(--colour-on-background);
+    border-radius: 1rem 0 1rem 1rem;
+}
+
+.message-box.same-device {
+    margin-top: 0.8rem;
+}
+
+.message-box.same-device {
+    margin-top: 0.8rem;
+}
+
+.attachment{
+    background-color: var(--colour-text);
+    position: relative;
+    border: 1px solid var(--colour-background-variant);
+    border-radius: 2rem;
+    height: 100%;
+    aspect-ratio: 3/4;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    user-select: none;
+}
+
+.attachment img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

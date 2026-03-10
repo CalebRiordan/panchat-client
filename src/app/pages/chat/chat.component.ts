@@ -5,6 +5,8 @@ import { ToastService } from '../../services/toast.service';
 import { finalize } from 'rxjs';
 import { generateGuid, getUrlFromHeic, getUrlFromPdf } from '../../shared/utils';
 import { isHeic } from 'heic-to';
+import { DataService } from '../../services/data.service';
+import { MessageBox } from '../../layouts/message-box/message-box';
 
 interface FilePreview {
   id: number;
@@ -26,7 +28,7 @@ const allowedTypes = [
 
 @Component({
   selector: 'app-chat',
-  imports: [],
+  imports: [MessageBox],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
 })
@@ -36,7 +38,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   sendingMessage = signal(false);
   files = signal<FilePreview[]>([]);
   uploadSize = 0;
-  deviceId!: string;
   filesReady = signal(false);
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
@@ -47,16 +48,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private toastService: ToastService,
   ) {
-    // Get device ID
-    var tempDeviceId = localStorage.getItem('chat_device_id');
-    if (!tempDeviceId) {
-      tempDeviceId = crypto.randomUUID ? crypto.randomUUID() : generateGuid();
-      localStorage.setItem('chat_device_id', tempDeviceId);
-    }
-    this.deviceId = tempDeviceId;
-
-    messageService.init(this.deviceId);
-
     effect(() => {
       const currentMessages = this.messages();
 

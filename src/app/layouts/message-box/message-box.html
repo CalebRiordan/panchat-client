@@ -1,0 +1,14 @@
+<div class="message-box" [class]="{
+        'local-message': message.deviceId == deviceId,
+        'foreign-message': message.deviceId != deviceId,
+        'same-device': sameDeviceAsPrevious
+    }">
+    @for (att of message.attachments.slice(0, 3); track att.url; let i = $index){
+    <div class="attachment" [class.loading]="true" [class.more-attachments]="i == 2 && message.attachments.length > 3">
+        <!-- TODO: Add loading logic -->
+        <img [src]="att.url" [alt]="`Attachment ${i}`" (load)="onImageLoad(att.url)"
+            [style.display]="true ? 'block' : 'none'">
+    </div>
+    }
+    {{message.text }}
+</div>

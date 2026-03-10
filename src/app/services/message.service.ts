@@ -5,7 +5,7 @@ import { Attachment } from '../models/attachment';
 import { env } from '../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { dateTimestampProvider } from 'rxjs/internal/scheduler/dateTimestampProvider';
+import { DataService } from './data.service';
 
 type AllowedMediaType = 'pdf' | 'png' | 'jpg' | 'webp';
 
@@ -19,10 +19,9 @@ export class MessageService {
   constructor(
     private signalR: SignalRService,
     private http: HttpClient,
-  ) {}
-
-  init(deviceId: string) {
-    this.deviceId = deviceId;
+    private dataService: DataService
+  ) {
+    this.deviceId = this.dataService.deviceId;
   }
 
   getLatestMessages(
