@@ -3,6 +3,7 @@ import { env } from '../../environments/environment';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, map, Observable, tap, throwError } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
+import { Router } from '@angular/router';
 
 interface AuthResponse {
   token: string;
@@ -15,12 +16,15 @@ const AUTH_FIELDS: Array<string> = ['username', 'password'];
 export class AuthService {
   private baseApiUrl = env.baseApiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+  ) {}
 
   private apiAuth(
     username: string,
     password: string,
-    method: 'login' | 'register'
+    method: 'login' | 'register',
   ): Observable<string> {
     const url = `${this.baseApiUrl}/api/Auth/${method}`;
 
@@ -34,7 +38,7 @@ export class AuthService {
         localStorage.setItem('jwt_token', res.token);
       }),
       map((res) => res.token),
-      catchError((err) => throwError(() => this.formatError(err)))
+      catchError((err) => throwError(() => this.formatError(err))),
     );
   }
 
@@ -44,6 +48,7 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('jwt_token');
+    this.router.navigate(['/session']);
   }
 
   register(username: string, password: string): Observable<string> {
@@ -80,7 +85,7 @@ export class AuthService {
       result['general'] =
         typeof err.error === 'string'
           ? err.error
-          : err.error?.message ?? 'An unknown error occurred';
+          : (err.error?.message ?? 'An unknown error occurred');
     }
 
     return result;

@@ -3,10 +3,10 @@ import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
 import { finalize } from 'rxjs';
-import { generateGuid, getUrlFromHeic, getUrlFromPdf } from '../../shared/utils';
+import { getUrlFromHeic, getUrlFromPdf } from '../../shared/utils';
 import { isHeic } from 'heic-to';
-import { DataService } from '../../services/data.service';
 import { MessageBox } from '../../layouts/message-box/message-box';
+import { AuthService } from '../../services/auth';
 
 interface FilePreview {
   id: number;
@@ -47,6 +47,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   constructor(
     private messageService: MessageService,
     private toastService: ToastService,
+    private authService: AuthService,
   ) {
     effect(() => {
       const currentMessages = this.messages();
@@ -58,16 +59,16 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    throw new Error('Method not implemented.');
+    this.messages.set([]);
+    this.files.set([]);
   }
 
   ngOnInit(): void {
     // Retrieve all messages
-    setTimeout(() => {}, 8000);
     if (this.messages.length == 0) {
       this.messageService.getLatestMessages().subscribe({
         next: (messages) => {
-          console.log(`Retrieved ${messages.length} messages: ${messages}`);
+          console.log(`Retrieved ${messages.length} messages: ${JSON.stringify(messages)}`);
 
           this.messages.set(messages);
         },
@@ -247,5 +248,9 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   private extensionIs(extension: string, preview: FilePreview) {
     return preview.filename.toLowerCase().endsWith(`.${extension}`);
+  }
+
+  onLogout() {
+    this.authService.logout();
   }
 }

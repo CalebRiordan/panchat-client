@@ -26,7 +26,10 @@ export class SignalRService {
   }
 
   public registerListener(signal: string, callback: Function): SignalRService {
-    this.hubConnection?.on(signal, (data) => callback(data));
+    this.hubConnection?.on(signal, (data) => {
+      console.log(`Data from websocket: ${JSON.stringify(data)}`);
+      callback(data)
+    });
     return this;
   }
 

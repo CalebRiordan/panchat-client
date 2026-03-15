@@ -19,7 +19,7 @@ export class MessageService {
   constructor(
     private signalR: SignalRService,
     private http: HttpClient,
-    private dataService: DataService
+    private dataService: DataService,
   ) {
     this.deviceId = this.dataService.deviceId;
   }
@@ -38,7 +38,7 @@ export class MessageService {
   }
 
   onIncomingMessage(callback: Function) {
-    this.signalR.buildConnection().registerListener('ReceiveMessage', callback).start();
+    this.signalR.buildConnection().registerListener('PushMessage', callback).start();
   }
 
   pushMessage(text?: string, files?: File[]): Observable<Message> {

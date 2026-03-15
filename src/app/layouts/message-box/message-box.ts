@@ -1,6 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, signal } from '@angular/core';
 import { Message } from '../../models/message';
 import { DataService } from '../../services/data.service';
+import { AttachmentInfo } from '../../models/attachment';
+
+interface AttachmentUI {
+  attachment: AttachmentInfo;
+  loaded: boolean;
+}
 
 @Component({
   selector: 'app-message-box',
@@ -8,17 +14,24 @@ import { DataService } from '../../services/data.service';
   templateUrl: './message-box.html',
   styleUrl: './message-box.css',
 })
-export class MessageBox {
+export class MessageBox implements OnInit{
   deviceId!: string;
+  attachmentUIs = signal<AttachmentUI[]>([]);
 
-  @Input() message!: Message
+  @Input() message!: Message;
   @Input() sameDeviceAsPrevious!: Boolean;
 
-  constructor(private dataService: DataService){
+  constructor(private dataService: DataService) {
     this.deviceId = this.dataService.deviceId;
   }
 
-  onImageLoad(url: string){
-    // Apply class to attachment
+  ngOnInit(): void {
+    this.attachmentUIs.set(this.message.attachments.map((a) => ({ attachment: a, loaded: false })));
+  }
+
+  onImageLoad(url: string) {
+    this.attachmentUIs.update((atts) =>
+      atts.map((a) => (a.attachment.url == url ? { ...a, loaded: true } : a)),
+    );
   }
 }
