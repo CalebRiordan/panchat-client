@@ -42,6 +42,7 @@ export class MessageService {
   }
 
   pushMessage(text?: string, files?: File[]): Observable<Message> {
+    // Validation before sending
     if (!this.deviceId) {
       throw new Error('MessageService must be initialized with a device ID first');
     }
@@ -50,18 +51,20 @@ export class MessageService {
       throw new Error('A message must have either text content or files to upload');
     }
 
-    const attachments = files?.map<Attachment>((f, i) => {
-      return { file: f, dateTimeSent: new Date(), ...(files.length > 0 && { queueOrder: i }) };
+    // Create form with files
+    const formData = new FormData();
+
+    formData.append('deviceId', this.deviceId);
+    formData.append('dateTimeSent', new Date().toISOString());
+    if (text) formData.append('text', text);
+
+    files?.forEach((f, i) => {
+      formData.append(`attachments[${i}].file`, f);
+      formData.append(`attachments[${i}].queueOrder`, i.toString());
     });
 
-    const message: CreateMessageModel = {
-      deviceId: this.deviceId,
-      ...(text && { text: text }),
-      dateTimeSent: new Date(),
-      ...(attachments && { attachments: attachments }),
-    };
-
-    return this.http.post<Message>(`${this.baseApiUrl}/api/message`, message);
+    // Send to API
+    return this.http.post<Message>(`${this.baseApiUrl}/api/message`, formData);
   }
 
   private isAllowedType(type: string): type is AllowedMediaType {

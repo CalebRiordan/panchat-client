@@ -27,6 +27,7 @@ export class MessageBox implements OnInit{
 
   ngOnInit(): void {
     this.attachmentUIs.set(this.message.attachments.map((a) => ({ attachment: a, loaded: false })));
+    console.log(this.message.attachments[0]?.url ?? `No url for message ${this.message.text}`);
   }
 
   onImageLoad(url: string) {

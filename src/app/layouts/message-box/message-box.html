@@ -3,16 +3,22 @@
         'foreign-message': message.deviceId != deviceId,
         'same-device': sameDeviceAsPrevious
     }">
-    @for (attUI of attachmentUIs().slice(0, 3); track attUI.attachment.url; let i = $index){
-    <div class="attachment" [class.loading]="!attUI.loaded"
-        [class.more-attachments]="i == 2 && message.attachments.length > 3">
-        @if(!attUI.loaded){
-        <span class="attachment-loader"></span>
+    <div class="attachments-container" [style.display]="attachmentUIs().length > 0 ? 'flex' : 'none'">
+        @for (attUI of attachmentUIs().slice(0, 3); track attUI.attachment.url; let i = $index){
+        <div class="attachment" [class.loading]="!attUI.loaded"
+            [class.more-attachments]="i == 2 && message.attachments.length > 3">
+            @if(!attUI.loaded){
+            <span class="attachment-loader"></span>
+            }
+            <img [src]="attUI.attachment.url" [alt]="`Attachment ${i}`" (load)="onImageLoad(attUI.attachment.url)"
+                [style.display]="attUI.loaded ? 'block' : 'none'" crossorigin="anonymous">
+        </div>
         }
-        <img [src]="attUI.attachment.url" [alt]="`Attachment ${i}`" (load)="onImageLoad(attUI.attachment.url)"
-            [style.display]="true ? 'block' : 'none'">
+    </div>
+
+    @if (message.text){
+    <div class="text">
+        {{message.text }}
     </div>
     }
-
-    {{message.text }}
 </div>

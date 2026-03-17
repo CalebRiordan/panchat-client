@@ -2,9 +2,9 @@
     <div class="nav-button nav-right" (click)="onLogout()">Logout</div>
  </div>
 
-<div class="chat-container">
+<div #chatContainer class="chat-container">
     <!-- ================ Display messages ================ -->
-    <div class="messages-container" #messagesContainer>
+    <div class="messages-container">
         @for (message of messages(); track message.id; let i = $index){
         <app-message-box [message]="message" [sameDeviceAsPrevious]="messages()[i-1]?.deviceId == message.deviceId">
         </app-message-box>
@@ -21,7 +21,7 @@
 
     <div class="create-message-controls">
         <!-- ================ Files preview ================ -->
-        <div #filesContainer class="files-container" [hidden]="files().length == 0">
+        <div class="files-container" [hidden]="files().length == 0">
             @for(preview of files(); track preview.url){
             <div class="file-preview" [class.loading]="!preview.loaded">
                 @if(!preview.loaded){

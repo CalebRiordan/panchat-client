@@ -40,9 +40,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   uploadSize = 0;
   filesReady = signal(false);
 
-  @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
+  @ViewChild('chatContainer') private chatContainer!: ElementRef;
   @ViewChild('messageInput') private messageInput!: ElementRef;
-  @ViewChild('filesContainer') private filesContainer!: ElementRef;
 
   constructor(
     private messageService: MessageService,
@@ -53,7 +52,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       const currentMessages = this.messages();
 
       if (currentMessages.length > 0) {
-        setTimeout(() => this.scrollToBottom(), 100);
+        this.scrollToBottom();
       }
     });
   }
@@ -68,9 +67,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (this.messages.length == 0) {
       this.messageService.getLatestMessages().subscribe({
         next: (messages) => {
-          console.log(`Retrieved ${messages.length} messages: ${JSON.stringify(messages)}`);
-
-          this.messages.set(messages);
+          (this.messages.set(messages), this.scrollToBottom(false));
         },
         error: (err) => {
           console.error('Error occurred while trying to retrieve messages: ' + err.message);
@@ -91,20 +88,22 @@ export class ChatComponent implements OnInit, OnDestroy {
     });
   }
 
-  private scrollToBottom() {
-    if (this.messagesContainer) {
-      const el = this.messagesContainer.nativeElement;
+  private scrollToBottom(onlyWhenNearBottom = true) {
+    setTimeout(() => {
+      if (this.chatContainer) {
+        const el = this.chatContainer.nativeElement;
 
-      const distanceFromBottom = el.scrollHeight - el.clientHeight - el.scrollTop;
+        const distanceFromBottom = el.scrollHeight - el.clientHeight - el.scrollTop;
 
-      if (distanceFromBottom < 100) {
-        el.scroll({
-          top: el.scrollHeight,
-          left: 0,
-          behaviour: 'smooth',
-        });
+        if (!onlyWhenNearBottom || (onlyWhenNearBottom && distanceFromBottom < 150)) {
+          el.scroll({
+            top: el.scrollHeight,
+            left: 0,
+            behavior: onlyWhenNearBottom ? 'smooth' : 'auto',
+          });
+        }
       }
-    }
+    }, 400);
   }
 
   adjustHeight(el: HTMLTextAreaElement) {
@@ -127,6 +126,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       const files = this.files().map((fp) => fp.file);
       this.sendingMessage.set(true);
 
+      // Send message and respond to result
       this.messageService
         .pushMessage(text ?? null, files)
         .pipe(finalize(() => this.sendingMessage.set(false)))
