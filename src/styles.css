@@ -26,3 +26,15 @@ html.dark-mode {
 html.light-mode {
     /* Add light mode */
 }
+
+@media (max-width: 1200px) {
+    :root {
+        font-size: 50%;
+    }
+}
+
+@media (max-width: 768px) {
+    .messages-container {
+        width: 31.25%;
+    }
+}

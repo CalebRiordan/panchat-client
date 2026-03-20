@@ -37,8 +37,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   firstFetch = signal(true);
   sendingMessage = signal(false);
   files = signal<FilePreview[]>([]);
-  uploadSize = 0;
   filesReady = signal(false);
+  uploadSize = 0;
+  scrollNewMessageIntoView = false;
 
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   @ViewChild('messageInput') private messageInput!: ElementRef;
@@ -95,7 +96,14 @@ export class ChatComponent implements OnInit, OnDestroy {
 
         const distanceFromBottom = el.scrollHeight - el.clientHeight - el.scrollTop;
 
-        if (!onlyWhenNearBottom || (onlyWhenNearBottom && distanceFromBottom < 150)) {
+        // Scroll to bottom of chat
+        if (
+          this.scrollNewMessageIntoView ||
+          !onlyWhenNearBottom ||
+          (onlyWhenNearBottom && distanceFromBottom < 150)
+        ) {
+          this.scrollNewMessageIntoView = false;
+
           el.scroll({
             top: el.scrollHeight,
             left: 0,
@@ -135,6 +143,8 @@ export class ChatComponent implements OnInit, OnDestroy {
             this.messageInput.nativeElement.style.height = 'auto';
             this.messageInput.nativeElement.style.overflowY = 'hidden';
             this.messageInput.nativeElement.value = '';
+            this.files.set([]);
+            this.scrollNewMessageIntoView = true;
           },
           error: (err) => {
             console.error(err);

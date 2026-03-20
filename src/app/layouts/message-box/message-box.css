@@ -33,6 +33,10 @@
     margin: 0;
     height: 30rem;
     width: 100%;
+
+    flex-direction: row;
+    gap: 1rem;
+    overflow-x: scroll;
 }
 
 .attachment {
@@ -48,7 +52,7 @@
     justify-content: center;
     overflow: hidden;
     user-select: none;
-    margin-bottom: 1rem;
+    cursor: pointer;
 }
 
 .attachment img {
@@ -72,6 +76,21 @@
     animation: rotation 1s linear infinite;
 }
 
+.more-attachments {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    width: 100%;
+    background-color: var(--colour-background-variant);
+    opacity: 0.8;
+    font-size: 4rem;
+
+    display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @keyframes rotation {
     0% {
         transform: rotate(0deg);
@@ -84,4 +103,22 @@
 
 .text {
     padding: 0.5rem 1rem;
+}
+
+@media (max-width: 1700px) {
+    .attachments-container {
+        height: 24rem;
+    }
+}
+
+@media (max-width: 1200px) {
+    .attachments-container {
+        height: 22rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .attachments-container {
+        height: 18rem;
+    }
 }

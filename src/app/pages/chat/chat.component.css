@@ -52,36 +52,51 @@
 }
 
 .loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.2rem;
-  height: 100%;
-  color: var(--colour-on-background-contrast);
-  font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.2rem;
+    height: 100%;
+    color: var(--colour-on-background-contrast);
+    font-family: sans-serif;
 }
 
 .loading-text {
-  animation: pulse 1.5s infinite ease-in-out;
-  font-size: 3rem;
+    animation: pulse 1.5s infinite ease-in-out;
+    font-size: 3rem;
 }
 
 /* The three jumping dots effect */
 .dot-pulse::after {
-  font-size: 3rem;
-  content: '...';
-  animation: dots 1.5s infinite;
+    font-size: 3rem;
+    content: '...';
+    animation: dots 1.5s infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
 }
 
 @keyframes dots {
-  0% { content: '.'; }
-  33% { content: '..'; }
-  66% { content: '...'; }
+    0% {
+        content: '.';
+    }
+
+    33% {
+        content: '..';
+    }
+
+    66% {
+        content: '...';
+    }
 }
 
 .no-messages-text {
@@ -104,18 +119,27 @@
 
 .files-container {
     position: absolute;
-    background-color: var(--colour-on-background);
+    bottom: 120%;
     width: calc(100% - 6rem - 1rem);
     height: 18rem;
+
     padding: 1rem;
+    background-color: var(--colour-on-background);
     box-sizing: border-box;
     border: 0.2px solid var(--colour-on-background-contrast);
     border-radius: 2rem;
+}
+
+.files-content {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
     display: flex;
     justify-content: start;
     gap: 1.5rem;
-    bottom: 120%;
     overflow-x: scroll;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
 }
 
 .file-preview {
@@ -286,5 +310,23 @@
 
     100% {
         transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 1700px) {
+    .messages-container {
+        width: 75%;
+    }
+}
+
+@media (max-width: 1200px) {
+    .messages-container {
+        width: 82%;
+    }
+}
+
+@media (max-width: 768px) {
+    .messages-container {
+        width: 90%;
     }
 }

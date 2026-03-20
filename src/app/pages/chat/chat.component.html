@@ -22,6 +22,7 @@
     <div class="create-message-controls">
         <!-- ================ Files preview ================ -->
         <div class="files-container" [hidden]="files().length == 0">
+            <div class="files-content">
             @for(preview of files(); track preview.url){
             <div class="file-preview" [class.loading]="!preview.loaded">
                 @if(!preview.loaded){
@@ -34,6 +35,7 @@
                 <div class="preview-name-strip">{{preview.filename}}</div>
             </div>
             }
+            </div>
         </div>
 
         <!-- ================ Create message textbox ================ -->
