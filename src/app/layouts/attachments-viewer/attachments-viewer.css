@@ -1,0 +1,45 @@
+.attachments-viewer{
+    position: fixed;
+    top: 4rem;
+    left: 4rem;
+    bottom: 4rem;
+    right: 4rem;
+    z-index: 999;
+
+    background-color: color-mix(in srgb, var(--colour-background-variant), transparent 100%);
+    padding: 6rem;
+    border-radius: 2rem;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4rem;
+    justify-content: center;
+
+    transition: opacity 0.3s ease;
+}
+
+.viewer-visible {
+    background-color: color-mix(in srgb, var(--colour-background-variant), transparent 15%);
+}
+
+.close-button{
+    position: absolute;
+    top: 1.5rem;
+    right: 2.5rem;
+    line-height: 0.8;
+    font-size: 5rem;
+    cursor: pointer;
+    color: var(--colour-text);
+    font-weight: bold;
+}
+
+img { 
+    opacity: 1;
+
+    border-radius: 2rem;
+    width: auto;
+    min-height: 60rem;
+    max-height: 90rem;
+    object-fit: cover;
+}

@@ -16,7 +16,7 @@
 
             <!-- Image -->
             <img [src]="attUI.attachment.url" [alt]="`Attachment ${i}`" (load)="onImageLoad(attUI.attachment.url)"
-                [style.display]="attUI.loaded ? 'block' : 'none'" crossorigin="anonymous">
+                [style.display]="attUI.loaded ? 'block' : 'none'" crossorigin="anonymous" (click)="onAttachmentClick(i, $event)">
 
             <!-- More attachments overlay -->
             @if(i == 2 && message.attachments.length > 3){

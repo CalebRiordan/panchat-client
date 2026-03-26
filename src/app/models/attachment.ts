@@ -11,3 +11,8 @@ export interface AttachmentInfo {
   messageId: string,
   queueOrder?: Number
 }
+
+export interface AttachmentUI {
+  attachment: AttachmentInfo;
+  loaded: boolean;
+}

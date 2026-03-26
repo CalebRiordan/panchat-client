@@ -7,6 +7,7 @@ import { getUrlFromHeic, getUrlFromPdf } from '../../shared/utils';
 import { isHeic } from 'heic-to';
 import { MessageBox } from '../../layouts/message-box/message-box';
 import { AuthService } from '../../services/auth';
+import { AttachmentsViewer } from "../../layouts/attachments-viewer/attachments-viewer";
 
 interface FilePreview {
   id: number;
@@ -28,7 +29,7 @@ const allowedTypes = [
 
 @Component({
   selector: 'app-chat',
-  imports: [MessageBox],
+  imports: [MessageBox, AttachmentsViewer],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
 })
