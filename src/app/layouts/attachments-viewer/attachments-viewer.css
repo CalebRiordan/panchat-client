@@ -7,7 +7,7 @@
     z-index: 999;
 
     background-color: color-mix(in srgb, var(--colour-background-variant), transparent 100%);
-    padding: 6rem;
+    padding: 4rem 6rem;
     border-radius: 2rem;
     box-sizing: border-box;
 
@@ -15,8 +15,9 @@
     flex-wrap: wrap;
     gap: 4rem;
     justify-content: center;
+    overflow-y: scroll;
 
-    transition: opacity 0.3s ease;
+    transition: background-color 0.3s ease;
 }
 
 .viewer-visible {
@@ -35,11 +36,15 @@
 }
 
 img { 
-    opacity: 1;
+    opacity: 0;
 
     border-radius: 2rem;
     width: auto;
     min-height: 60rem;
     max-height: 90rem;
     object-fit: cover;
+}
+
+.viewer-visible img {
+    opacity: 1;
 }

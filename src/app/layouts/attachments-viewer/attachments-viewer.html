@@ -1,9 +1,9 @@
 @if (avs.attachmentUIs().length > 0){
-<div class="attachments-viewer" [class.viewer-visible]="visible()">
+<div #viewer class="attachments-viewer" [class.viewer-visible]="visible()">
     <div class="close-button" (click)="avs.clear()">X</div>
 
     @for (att of avs.attachmentUIs(); track att.attachment.url) {
-    <img [src]="att.attachment.url">
+    <img #image [src]="att.attachment.url">
     }
 </div>
 }
