@@ -5,17 +5,11 @@
     bottom: 4rem;
     right: 4rem;
     z-index: 999;
+    padding: 0 0.8rem;
 
     background-color: color-mix(in srgb, var(--colour-background-variant), transparent 100%);
-    padding: 4rem 6rem;
     border-radius: 2rem;
     box-sizing: border-box;
-
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4rem;
-    justify-content: center;
-    overflow-y: scroll;
 
     transition: background-color 0.3s ease;
 }
@@ -24,15 +18,27 @@
     background-color: color-mix(in srgb, var(--colour-background-variant), transparent 15%);
 }
 
+.images-container {
+    width: 100%;
+    height: 100%;
+    padding: 4rem 6rem;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4rem;
+    justify-content: center;
+    overflow-y: scroll;
+
+}
+
 .close-button{
     position: absolute;
-    top: 1.5rem;
-    right: 2.5rem;
+    top: 2rem;
+    right: 3rem;
     line-height: 0.8;
     font-size: 5rem;
     cursor: pointer;
     color: var(--colour-text);
-    font-weight: bold;
 }
 
 img { 
@@ -43,6 +49,7 @@ img {
     min-height: 60rem;
     max-height: 90rem;
     object-fit: cover;
+    will-change: transform;
 }
 
 .viewer-visible img {

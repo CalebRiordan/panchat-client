@@ -10,6 +10,13 @@ import {
 import { AttachmentsViewerService } from '../../services/attachments-viewer.service';
 import { AttachmentUI } from '../../models/attachment';
 
+interface TargetImageFinalState {
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+}
+
 @Component({
   selector: 'app-attachments-viewer',
   imports: [],
@@ -19,7 +26,6 @@ import { AttachmentUI } from '../../models/attachment';
 export class AttachmentsViewer {
   visible = signal(false);
   attachmentUIs: AttachmentUI[] = [];
-  stuntDouble: any;
 
   @ViewChildren('image') images!: QueryList<ElementRef>;
   @ViewChild('viewer') viewer!: ElementRef;
@@ -31,13 +37,11 @@ export class AttachmentsViewer {
       console.log(`Attachments count: ${this.attachmentUIs.length}`);
 
       if (this.attachmentUIs.length > 0) {
-        await this.renderImages();
-
-        this.scrollToAttachment(avs.targetIndex);
+        await this.renderImages(); // Ensure layout is calculated
 
         if (avs.targetRect) {
-          this.createStuntDouble(avs.targetRect);
-          this.transitionStuntDouble();
+          this.scrollToAttachment(avs.targetIndex);
+          this.transitionImage(avs.targetRect, avs.targetIndex);
         }
 
         // Set visibility timeout
@@ -47,7 +51,6 @@ export class AttachmentsViewer {
       } else {
         console.log(`reset avs.visible`);
         this.visible.set(false);
-        // delete stunt double
       }
     });
   }
@@ -70,21 +73,35 @@ export class AttachmentsViewer {
     }, 0);
   }
 
-  private createStuntDouble(targetRect: DOMRect) {
-    this.stuntDouble = {
-      url: this.avs.attachmentUIs()[this.avs.targetIndex].attachment.url,
-      top: targetRect.top,
-      bottom: targetRect.bottom,
-      left: targetRect.left,
-      right: targetRect.right,
-      style: {
-        transform: `translate(${window.innerWidth / 2 - targetRect.left}px, ${window.innerHeight / 2 - targetRect.top}px) scale(2)`,
-        transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-      },
-    };
-  }
+  /**
+   * Applies styles to the target image in the attachments viewer to create an animation that gives the appearance that
+   * the clicked image in the chat transitions in position and scale to the same image as displayed in the attachments
+   * viewer
+   *
+   * @param {DOMRect} targetRectOrigin The size and position in the viewport of the original image clicked in the chat
+   * @param {number} index The index of the image in the list of images to be displayed in the attachments viewer
+   */
+  private transitionImage(targetRectOrigin: DOMRect, index: number) {
+    const finalEl = this.images.toArray()[index].nativeElement as HTMLElement;
+    const finalElRect = finalEl.getBoundingClientRect();
 
-  private transitionStuntDouble() {}
+    const deltaX = targetRectOrigin.left - finalElRect.left;
+    const deltaY = targetRectOrigin.top - finalElRect.top;
+    const scaleW = targetRectOrigin.width / finalElRect.width;
+    const scaleH = targetRectOrigin.height / finalElRect.height;
+
+    finalEl.style.transition = 'none';
+    finalEl.style.transformOrigin = 'top left';
+    finalEl.style.opacity = '1';
+    finalEl.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scaleW}, ${scaleH})`;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        finalEl.style.transition = 'transform 400ms cubic-bezier(0.2, 0.9, 0.3, 1)';
+        finalEl.style.transform = 'none';
+      });
+    });
+  }
 
   private scrollToAttachment(index: number) {
     const images = this.images.toArray();
@@ -93,6 +110,8 @@ export class AttachmentsViewer {
       const imageEl = images[index].nativeElement as HTMLElement;
       const viewerEl = this.viewer.nativeElement as HTMLElement;
       const imageTop = imageEl.offsetTop;
+
+      console.log(`Scrolling to y ${imageTop} in attachments viewer`);
 
       viewerEl.scrollTo({
         top: imageTop - 20,
