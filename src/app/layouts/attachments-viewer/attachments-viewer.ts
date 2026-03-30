@@ -34,7 +34,6 @@ export class AttachmentsViewer {
     // Make viewer visible 0.3 seconds after initiation
     effect(async () => {
       this.attachmentUIs = avs.attachmentUIs();
-      console.log(`Attachments count: ${this.attachmentUIs.length}`);
 
       if (this.attachmentUIs.length > 0) {
         await this.renderImages(); // Ensure layout is calculated
@@ -47,9 +46,8 @@ export class AttachmentsViewer {
         // Set visibility timeout
         setTimeout(() => {
           this.visible.set(true);
-        }, 300);
+        }, 100);
       } else {
-        console.log(`reset avs.visible`);
         this.visible.set(false);
       }
     });
@@ -111,10 +109,8 @@ export class AttachmentsViewer {
       const viewerEl = this.viewer.nativeElement as HTMLElement;
       const imageTop = imageEl.offsetTop;
 
-      console.log(`Scrolling to y ${imageTop} in attachments viewer`);
-
       viewerEl.scrollTo({
-        top: imageTop - 20,
+        top: imageTop - 55,
         left: 0,
         behavior: 'instant',
       });

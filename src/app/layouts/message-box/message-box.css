@@ -8,7 +8,7 @@
     background-color: var(--colour-on-background-contrast);
     border-radius: 0 1rem 1rem 1rem;
     width: fit-content;
-    max-width: 75%;
+    max-width: 72%;
     font-size: 1.8rem;
     color: var(--colour-text);
     border: none;
@@ -31,7 +31,7 @@
 
 .attachments-container {
     margin: 0;
-    height: 30rem;
+    height: 32rem;
     width: 100%;
 
     flex-direction: row;
@@ -87,8 +87,8 @@
     font-size: 4rem;
 
     display: flex;
-  align-items: center;
-  justify-content: center;
+    align-items: center;
+    justify-content: center;
 }
 
 @keyframes rotation {
@@ -107,13 +107,17 @@
 
 @media (max-width: 1700px) {
     .attachments-container {
-        height: 24rem;
+        height: 29rem;
+    }
+
+    .message-box {
+        max-width: 65%;
     }
 }
 
 @media (max-width: 1200px) {
     .attachments-container {
-        height: 22rem;
+        height: 24rem;
     }
 }
 

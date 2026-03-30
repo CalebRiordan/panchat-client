@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, signal } from '@angular/core';
 import { Message } from '../../models/message';
 import { DataService } from '../../services/data.service';
-import { AttachmentInfo, AttachmentUI } from '../../models/attachment';
+import { AttachmentUI } from '../../models/attachment';
 import { AttachmentsViewerService } from '../../services/attachments-viewer.service';
 
 @Component({

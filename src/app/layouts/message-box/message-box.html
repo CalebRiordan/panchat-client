@@ -20,7 +20,7 @@
 
             <!-- More attachments overlay -->
             @if(i == 2 && message.attachments.length > 3){
-            <span class="more-attachments">
+            <span class="more-attachments" (click)="onAttachmentClick(2, $event)">
                 +{{message.attachments.length - 2}}
             </span>
             }

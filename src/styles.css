@@ -5,10 +5,10 @@
 :root {
     --muted-olive: #9dbf86;
     --shamerock: #569b65;
-    --deep-teal: #52796f;
+    --deep-teal: #5a877c;
     --granite: #38534C;
-    --dark-slate-grey: #354f52ff;
-    --charcoal-blue: #2f3e46ff;
+    --dark-slate-grey: #2d4446;
+    --charcoal-blue: #28353c;
 
     font-size: 62.5%;
     font-family: 'Verdana', ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
