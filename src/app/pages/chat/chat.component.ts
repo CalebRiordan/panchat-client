@@ -77,6 +77,7 @@ export class ChatComponent implements OnInit, OnDestroy {
             'An error occurred trying to fetch message for this account',
             'error',
           );
+          this.firstFetch.set(false);
         },
         complete: () => this.firstFetch.set(false),
       });

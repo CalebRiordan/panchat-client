@@ -37,4 +37,8 @@ html.light-mode {
     .messages-container {
         width: 31.25%;
     }
+
+    :root {
+        font-size: 37.5%;
+    }
 }

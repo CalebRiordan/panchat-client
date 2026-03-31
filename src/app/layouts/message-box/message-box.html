@@ -2,10 +2,11 @@
         'local-message': message.deviceId == deviceId,
         'foreign-message': message.deviceId != deviceId,
         'same-device': sameDeviceAsPrevious
-    }">
+    }"
+    [class.has-attachments]="attachmentUIs().length > 0">
 
     <!-- Attachments -->
-    <div class="attachments-container" [style.display]="attachmentUIs().length > 0 ? 'flex' : 'none'">
+    <div class="attachments-container">
         @for (attUI of attachmentUIs().slice(0, 3); track attUI.attachment.url; let i = $index){
 
         <div class="attachment" [class.loading]="!attUI.loaded">
