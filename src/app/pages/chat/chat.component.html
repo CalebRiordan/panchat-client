@@ -9,12 +9,15 @@
         <app-message-box [message]="message" [sameDeviceAsPrevious]="messages()[i-1]?.deviceId == message.deviceId">
         </app-message-box>
         } @empty {
-        @if (firstFetch()){
+        @if (initialFetch()){
         <div class="loading-container">
             <span class="loading-text">Fetching messages</span>
             <span class="dot-pulse"></span>
-        </div>} @else {
-        <div class="no-messages-text">There are no messages on this chat yet</div>
+        </div>
+        } @else if (initialError()) {
+            <div class="retrieval-failed-text">An error occured while tryig to retrieve messages!</div>
+        } @else {
+            <div class="retrieval-failed-text">There are no messages on this chat yet</div>
         }
         }
     </div>

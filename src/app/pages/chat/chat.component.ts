@@ -7,7 +7,8 @@ import { getUrlFromHeic, getUrlFromPdf } from '../../shared/utils';
 import { isHeic } from 'heic-to';
 import { MessageBox } from '../../layouts/message-box/message-box';
 import { AuthService } from '../../services/auth';
-import { AttachmentsViewer } from "../../layouts/attachments-viewer/attachments-viewer";
+import { AttachmentsViewer } from '../../layouts/attachments-viewer/attachments-viewer';
+import { DataService } from '../../services/data.service.js';
 
 interface FilePreview {
   id: number;
@@ -35,7 +36,8 @@ const allowedTypes = [
 })
 export class ChatComponent implements OnInit, OnDestroy {
   messages = signal<Message[]>([]);
-  firstFetch = signal(true);
+  initialFetch = signal(true);
+  initialError = signal(false);
   sendingMessage = signal(false);
   files = signal<FilePreview[]>([]);
   filesReady = signal(false);
@@ -49,6 +51,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private toastService: ToastService,
     private authService: AuthService,
+    private dataService: DataService,
   ) {
     effect(() => {
       const currentMessages = this.messages();
@@ -57,6 +60,29 @@ export class ChatComponent implements OnInit, OnDestroy {
         this.scrollToBottom();
       }
     });
+
+    effect(() => {
+      const trigger = this.dataService.copyCommand();
+      if (trigger === 0) return;
+
+      const lastMessage = this.messages().at(-1);
+
+      if (lastMessage?.attachments.length ?? 0 > 0) {
+        //TODO: Copy blob to clipboard, ensuring copy happens only once image is loaded
+        // navigator.clipboard.write()
+        console.log('Copy image');
+      } else {
+        navigator.clipboard.writeText(lastMessage?.text ?? '');
+        console.log('Copy text');
+      }
+    });
+
+    effect(async () => {
+      const trigger = this.dataService.pasteCommand();
+      if (trigger === 0) return;
+
+      this.messageInput.nativeElement.value = await navigator.clipboard.readText();
+    })
   }
 
   ngOnDestroy(): void {
@@ -69,7 +95,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (this.messages.length == 0) {
       this.messageService.getLatestMessages().subscribe({
         next: (messages) => {
-          (this.messages.set(messages), this.scrollToBottom(false));
+          this.messages.set(messages);
+          this.scrollToBottom(false);
         },
         error: (err) => {
           console.error('Error occurred while trying to retrieve messages: ' + err.message);
@@ -77,9 +104,10 @@ export class ChatComponent implements OnInit, OnDestroy {
             'An error occurred trying to fetch message for this account',
             'error',
           );
-          this.firstFetch.set(false);
+          this.initialFetch.set(false);
+          this.initialError.set(true);
         },
-        complete: () => this.firstFetch.set(false),
+        complete: () => this.initialFetch.set(false),
       });
     }
 

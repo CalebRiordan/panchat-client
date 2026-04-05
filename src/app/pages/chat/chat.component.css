@@ -99,7 +99,7 @@
     }
 }
 
-.no-messages-text {
+.retrieval-failed-text {
     color: var(--colour-on-background-contrast);
     margin-top: 5rem;
     font-size: 2.5rem;
