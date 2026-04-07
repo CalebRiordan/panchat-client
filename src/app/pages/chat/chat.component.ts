@@ -9,6 +9,7 @@ import { MessageBox } from '../../layouts/message-box/message-box';
 import { AuthService } from '../../services/auth';
 import { AttachmentsViewer } from '../../layouts/attachments-viewer/attachments-viewer';
 import { DataService } from '../../services/data.service.js';
+import { ClipboardService } from '../../services/clipboard.service.js';
 
 interface FilePreview {
   id: number;
@@ -46,12 +47,13 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   @ViewChild('messageInput') private messageInput!: ElementRef;
+  @ViewChild('fileInput') private fileInput!: ElementRef<HTMLInputElement>;
 
   constructor(
     private messageService: MessageService,
     private toastService: ToastService,
     private authService: AuthService,
-    private dataService: DataService,
+    private clipbardService: ClipboardService
   ) {
     effect(() => {
       const currentMessages = this.messages();
@@ -62,7 +64,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     });
 
     effect(() => {
-      const trigger = this.dataService.copyCommand();
+      const trigger = this.clipbardService.copyCommand();
       if (trigger === 0) return;
 
       const lastMessage = this.messages().at(-1);
@@ -78,10 +80,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     });
 
     effect(async () => {
-      const trigger = this.dataService.pasteCommand();
+      const trigger = this.clipbardService.pasteCommand();
       if (trigger === 0) return;
 
-      this.messageInput.nativeElement.value = await navigator.clipboard.readText();
+      const files = this.clipbardService.pastedFiles;
+      const text = this.clipbardService.pastedText;
+      if (text) this.messageInput.nativeElement.value = text;
+      if (files) this.fileInput.nativeElement.files = 
     })
   }
 
