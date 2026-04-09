@@ -1,13 +1,10 @@
 import { Injectable } from '@angular/core';
 import { SignalRService } from './signalr.service';
-import { CreateMessageModel, Message } from '../models/message';
-import { Attachment } from '../models/attachment';
+import { Message } from '../models/message';
 import { env } from '../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { DataService } from './data.service';
-
-type AllowedMediaType = 'pdf' | 'png' | 'jpg' | 'webp';
 
 @Injectable({
   providedIn: 'root',
@@ -65,9 +62,5 @@ export class MessageService {
 
     // Send to API
     return this.http.post<Message>(`${this.baseApiUrl}/api/message`, formData);
-  }
-
-  private isAllowedType(type: string): type is AllowedMediaType {
-    return ['pdf', 'png', 'jpg', 'webp'].includes(type);
   }
 }

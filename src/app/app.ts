@@ -21,10 +21,7 @@ export class App {
 
   @HostListener('window:paste', ['$event'])
   onPaste(event: ClipboardEvent) {
-    const clipboardItems = event.clipboardData?.items;
-    if (!clipboardItems) return
-
-    if (clipboardItems) this.clipboardService.paste(Array.from(clipboardItems));
+    if (event.clipboardData) this.clipboardService.paste(event.clipboardData);
     event.preventDefault();
   }
 

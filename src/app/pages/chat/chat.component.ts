@@ -19,7 +19,7 @@ interface FilePreview {
   loaded: Boolean;
 }
 
-const allowedTypes = [
+export const allowedTypes = [
   'image/png',
   'image/jpeg',
   'image/heic',
@@ -53,7 +53,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private toastService: ToastService,
     private authService: AuthService,
-    private clipbardService: ClipboardService
+    private clipbardService: ClipboardService,
   ) {
     effect(() => {
       const currentMessages = this.messages();
@@ -85,9 +85,14 @@ export class ChatComponent implements OnInit, OnDestroy {
 
       const files = this.clipbardService.pastedFiles;
       const text = this.clipbardService.pastedText;
+
+      console.log("Clipboard - files and text");
+      console.log(files);
+      console.log(text);
+      
       if (text) this.messageInput.nativeElement.value = text;
-      if (files) this.fileInput.nativeElement.files = 
-    })
+      if (files) await this.createPreviews(files);
+    });
   }
 
   ngOnDestroy(): void {
@@ -191,9 +196,12 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   async onFilesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
+    await this.createPreviews(Array.from(input.files ?? []));
+  }
 
+  async createPreviews(files: File[]) {
     // Create preview objects with empty URL
-    const previews = Array.from(input.files ?? []).map((file) => ({
+    const previews = files.map((file) => ({
       id: Date.now() + Math.random(),
       filename: file.name,
       file: file,
