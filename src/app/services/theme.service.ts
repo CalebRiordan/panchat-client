@@ -1,42 +1,33 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ThemeService {
-  private isDarkMode = new BehaviorSubject<boolean>(!!localStorage.getItem('theme'));
-
-  darkMode$ = this.isDarkMode.asObservable();
-
   constructor() {
-    const theme = localStorage.getItem('theme');
-    let isDarkMode = true; //default
-
-    if (theme === 'light') {
-      isDarkMode = false;
-    } else if (theme !== 'dark') {
-      localStorage.setItem('theme', 'dark');
-    }
-
-    this.applyTheme(isDarkMode);
+    console.log("Theme service initialized");
+    
+    this.applyTheme(this.getTheme());
   }
 
   toggleTheme() {
-    this.applyTheme(!this.isDarkMode.getValue());
+    this.applyTheme(this.oppositeTheme(this.getTheme()));
   }
 
-  applyTheme(darkMode: boolean) {
-    this.isDarkMode.next(darkMode);
+  applyTheme(theme: 'dark' | 'light') {
+    localStorage.setItem('theme', theme);
+    console.log(`THEME: ${theme}`);
 
-    if (darkMode) {
-      localStorage.setItem('theme', 'dark');
-      document.documentElement.classList.remove('light-mode');
-      document.documentElement.classList.add('dark-mode');
-    } else {
-      localStorage.setItem('theme', 'light');
-      document.documentElement.classList.remove('dark-mode');
-      document.documentElement.classList.add('light-mode');
-    }
+    document.documentElement.classList.remove(`${this.oppositeTheme(theme)}-mode`);
+    document.documentElement.classList.add(`${theme}-mode`);
+  }
+
+  private getTheme() {
+    const theme = localStorage.getItem('theme');
+    return theme === 'light' ? 'light' : 'dark';
+  }
+
+  private oppositeTheme(theme: 'dark' | 'light') {
+    return theme === 'dark' ? 'light' : 'dark';
   }
 }

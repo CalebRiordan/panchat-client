@@ -2,7 +2,6 @@ import { Component, HostListener, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ThemeService } from './services/theme.service';
 import { Toast } from './layouts/toast/toast';
-import { DataService } from './services/data.service.js';
 import { ClipboardService } from './services/clipboard.service.js';
 
 @Component({
@@ -12,7 +11,11 @@ import { ClipboardService } from './services/clipboard.service.js';
   styleUrl: './app.css',
 })
 export class App {
-  constructor(private clipboardService: ClipboardService) {}
+  // DONT REMOVE THE THEME SERVICE!
+  constructor(
+    private themeService: ThemeService,
+    private clipboardService: ClipboardService,
+  ) {}
 
   protected readonly title = signal('panchat-client');
 
@@ -21,6 +24,7 @@ export class App {
 
   @HostListener('window:paste', ['$event'])
   onPaste(event: ClipboardEvent) {
+    console.log("PASTE EVENT");
     if (event.clipboardData) this.clipboardService.paste(event.clipboardData);
     event.preventDefault();
   }

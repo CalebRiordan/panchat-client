@@ -1,4 +1,13 @@
-import { Component, effect, ElementRef, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  effect,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  signal,
+  untracked,
+  ViewChild,
+} from '@angular/core';
 import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
@@ -8,7 +17,6 @@ import { isHeic } from 'heic-to';
 import { MessageBox } from '../../layouts/message-box/message-box';
 import { AuthService } from '../../services/auth';
 import { AttachmentsViewer } from '../../layouts/attachments-viewer/attachments-viewer';
-import { DataService } from '../../services/data.service.js';
 import { ClipboardService } from '../../services/clipboard.service.js';
 
 interface FilePreview {
@@ -47,7 +55,6 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   @ViewChild('messageInput') private messageInput!: ElementRef;
-  @ViewChild('fileInput') private fileInput!: ElementRef<HTMLInputElement>;
 
   constructor(
     private messageService: MessageService,
@@ -55,6 +62,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private clipbardService: ClipboardService,
   ) {
+    // Effect for messages
     effect(() => {
       const currentMessages = this.messages();
 
@@ -63,6 +71,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Effect for copyCommand
     effect(() => {
       const trigger = this.clipbardService.copyCommand();
       if (trigger === 0) return;
@@ -79,19 +88,26 @@ export class ChatComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Effect for pasteCommand
     effect(async () => {
       const trigger = this.clipbardService.pasteCommand();
       if (trigger === 0) return;
 
-      const files = this.clipbardService.pastedFiles;
-      const text = this.clipbardService.pastedText;
+      untracked(async () => {
+        const files = this.clipbardService.pastedFiles;
+        const text = this.clipbardService.pastedText;
 
-      console.log("Clipboard - files and text");
-      console.log(files);
-      console.log(text);
-      
-      if (text) this.messageInput.nativeElement.value = text;
-      if (files) await this.createPreviews(files);
+        console.log('Clipboard - files and text');
+        console.log(files);
+        console.log(text);
+
+        if (text) {
+          setTimeout(() => {
+            this.messageInput.nativeElement.value = text;
+          });
+        }
+        if (files) await this.createPreviews(files);
+      });
     });
   }
 
@@ -296,6 +312,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   onRemoveFile(id: number) {
+    console.log('remove file');
     this.files.update((current) => current.filter((p) => p.id != id));
   }
 

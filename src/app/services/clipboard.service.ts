@@ -5,42 +5,35 @@ import { allowedTypes } from '../pages/chat/chat.component.js';
 export class ClipboardService {
   pasteCommand = signal(0);
   copyCommand = signal(0);
-  pastedFiles: File[] = [];
-  pastedText?: string;
+  pastedFiles: File[] | null = null;
+  pastedText: string | null = null;
 
   copy() {}
 
   paste(data: DataTransfer) {
+    this.pastedFiles = null;
+    this.pastedText = null;
+
+    console.log("\nPASTE() IN CLIPBOARD SERVICE\n");
+    
+    // First check for any Clipboard files
     const uploadableFiles = Array.from(data.files).filter((f) => allowedTypes.includes(f.type));
-    console.log(uploadableFiles);
     if (uploadableFiles.length > 0) {
       this.pastedFiles = uploadableFiles;
-      this.pastedText = '';
       this.pasteCommand.update((v) => v + 1);
       return;
     }
-    // const imageItems = items.filter((i) => i.kind === 'file' && i.type.startsWith('image/'));
 
-    // Clipboard images
-    //   const blobs: File[] = [];
-    //   for (const item of imageItems) {
-    //     const blob = item.getAsFile();
-    //     if (blob) blobs.push(blob);
-    //   }
-
-    //   this.pastedFiles = blobs;
-
-    // Clipboard text, if no images
-    const textItem = Array.from(data.items).find(
-      (i) => i.kind === 'text' && i.type === 'text/plain',
-    );
+    // // Clipboard text, if no files
+    const textItem = Array.from(data.items).find((i) => {
+      return i.kind === 'string' && i.type === 'text/plain';
+    });
 
     if (textItem) {
       textItem.getAsString((text) => {
         this.pastedText = text;
+        this.pasteCommand.update((v) => v + 1);
       });
-
-      this.pasteCommand.update((v) => v + 1);
     }
   }
 
