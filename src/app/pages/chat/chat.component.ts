@@ -12,7 +12,7 @@ import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
 import { finalize } from 'rxjs';
-import { getUrlFromHeic, getUrlFromPdf } from '../../shared/utils';
+import { convertToPngBlob, getUrlFromHeic, getUrlFromPdf } from '../../shared/utils';
 import { isHeic } from 'heic-to';
 import { MessageBox } from '../../layouts/message-box/message-box';
 import { AuthService } from '../../services/auth';
@@ -72,20 +72,35 @@ export class ChatComponent implements OnInit, OnDestroy {
     });
 
     // Effect for copyCommand
-    effect(() => {
+    effect(async () => {
       const trigger = this.clipbardService.copyCommand();
       if (trigger === 0) return;
 
-      const lastMessage = this.messages().at(-1);
+      untracked(() => {
+        const lastMessage = this.messages().at(-1);
+        const file = lastMessage?.attachments[0];
 
-      if (lastMessage?.attachments.length ?? 0 > 0) {
-        //TODO: Copy blob to clipboard, ensuring copy happens only once image is loaded
-        // navigator.clipboard.write()
-        console.log('Copy image');
-      } else {
-        navigator.clipboard.writeText(lastMessage?.text ?? '');
-        console.log('Copy text');
-      }
+        // Check if last message has file to copy - write blob to clipboard
+        if (file) {
+          let getBlobFn;
+
+          // Get blob using URL
+          switch (file.type) {
+            case 'image/png':
+              getBlobFn = async () => (await fetch(file.url)).blob();
+              break;
+            case 'image/jpeg':
+              getBlobFn = async () => convertToPngBlob(file.url);
+              break;
+
+            default:
+              // Show download option
+              return;
+          }
+
+          this.clipbardService.writeContent(getBlobFn, lastMessage.text);
+        }
+      });
     });
 
     // Effect for pasteCommand
@@ -97,10 +112,9 @@ export class ChatComponent implements OnInit, OnDestroy {
         const files = this.clipbardService.pastedFiles;
         const text = this.clipbardService.pastedText;
 
-        console.log('Clipboard - files and text');
         console.log(files);
         console.log(text);
-
+        
         if (text) {
           setTimeout(() => {
             this.messageInput.nativeElement.value = text;
@@ -312,7 +326,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   onRemoveFile(id: number) {
-    console.log('remove file');
     this.files.update((current) => current.filter((p) => p.id != id));
   }
 

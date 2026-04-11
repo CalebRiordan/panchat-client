@@ -5,8 +5,6 @@ import { Injectable } from '@angular/core';
 })
 export class ThemeService {
   constructor() {
-    console.log("Theme service initialized");
-    
     this.applyTheme(this.getTheme());
   }
 
@@ -16,7 +14,6 @@ export class ThemeService {
 
   applyTheme(theme: 'dark' | 'light') {
     localStorage.setItem('theme', theme);
-    console.log(`THEME: ${theme}`);
 
     document.documentElement.classList.remove(`${this.oppositeTheme(theme)}-mode`);
     document.documentElement.classList.add(`${theme}-mode`);

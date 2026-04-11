@@ -24,11 +24,16 @@ export class App {
 
   @HostListener('window:paste', ['$event'])
   onPaste(event: ClipboardEvent) {
-    console.log("PASTE EVENT");
     if (event.clipboardData) this.clipboardService.paste(event.clipboardData);
     event.preventDefault();
   }
 
   @HostListener('window:copy', ['$event'])
-  onCopy(event: ClipboardEvent) {}
+  onCopy(event: ClipboardEvent) {
+    const target = event.target as HTMLElement;
+    this.clipboardService.copy();
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      return; // Browser handles standard text copying
+    }
+  }
 }

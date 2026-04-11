@@ -45,6 +45,34 @@ export async function getUrlFromPdf(file: File): Promise<string> {
   return '';
 }
 
+export async function convertToPngBlob(url: string): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    // Must allow cross-origin for the canvas to not become "tainted"
+    img.crossOrigin = 'anonymous'; 
+    img.src = url;
+
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject('Failed to get canvas context');
+      
+      ctx.drawImage(img, 0, 0);
+      
+      // Export specifically as image/png
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else reject('Canvas toBlob failed');
+      }, 'image/png');
+    };
+
+    img.onerror = () => reject('Failed to load image for conversion');
+  });
+}
+
 export async function getUrlFromHeic(file: File): Promise<string> {
   // Convert any HEIC images to JPG
   const blobArray = await heicTo({
