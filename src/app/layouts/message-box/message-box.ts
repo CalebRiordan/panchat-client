@@ -1,8 +1,9 @@
 import { Component, Input, OnInit, signal } from '@angular/core';
 import { Message } from '../../models/message';
 import { DataService } from '../../services/data.service';
-import { AttachmentUI } from '../../models/attachment';
+import { AttachmentInfo, AttachmentUI } from '../../models/attachment';
 import { AttachmentsViewerService } from '../../services/attachments-viewer.service';
+import { AttachmentActionsService } from '../../services/attachment-actions.service';
 
 @Component({
   selector: 'app-message-box',
@@ -13,11 +14,19 @@ import { AttachmentsViewerService } from '../../services/attachments-viewer.serv
 export class MessageBox implements OnInit {
   deviceId!: string;
   attachmentUIs = signal<AttachmentUI[]>([]);
+  copyingUrl = signal<string | null>(null);
+  copySuccessUrl = signal<string | null>(null);
+  copyErrorUrl = signal<string | null>(null);
+  private copyTimeouts = new Map<string, number>();
 
   @Input() message!: Message;
   @Input() sameDeviceAsPrevious!: Boolean;
 
-  constructor(private dataService: DataService, private avs: AttachmentsViewerService) {
+  constructor(
+    private dataService: DataService,
+    private attachmentViewerService: AttachmentsViewerService,
+    private attachmentActionsService: AttachmentActionsService,
+  ) {
     this.deviceId = this.dataService.deviceId;
   }
 
@@ -31,8 +40,50 @@ export class MessageBox implements OnInit {
     );
   }
 
-  onAttachmentClick(index: number, event: MouseEvent) {
+  onViewAttachment(index: number, event: MouseEvent) {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
-    this.avs.show(this.attachmentUIs(), rect, index);
+    this.attachmentViewerService.show(this.attachmentUIs(), rect, index);
+  }
+
+  async onCopyAttachment(attachment: AttachmentInfo, event: MouseEvent) {
+    event.stopPropagation();
+    
+    const url = attachment.url;
+    
+    // Clear any existing timeout for this attachment
+    if (this.copyTimeouts.has(url)) {
+      clearTimeout(this.copyTimeouts.get(url)!);
+      this.copyTimeouts.delete(url);
+    }
+    
+    // Set to loading state
+    this.copyingUrl.set(url);
+    this.copySuccessUrl.set(null);
+    this.copyErrorUrl.set(null);
+    
+    // Perform the copy action
+    const success = await this.attachmentActionsService.copyAttachment(attachment, this.message.text);
+    
+    // Set to success or error state
+    this.copyingUrl.set(null);
+    if (success) {
+      this.copySuccessUrl.set(url);
+    } else {
+      this.copyErrorUrl.set(url);
+    }
+    
+    // Reset to normal state after 3 seconds
+    const timeout = window.setTimeout(() => {
+      this.copySuccessUrl.set(null);
+      this.copyErrorUrl.set(null);
+      this.copyTimeouts.delete(url);
+    }, 2000);
+    
+    this.copyTimeouts.set(url, timeout);
+  }
+
+  onDownloadAttachment(attachment: AttachmentInfo, event: MouseEvent) {
+    event.stopPropagation();
+    this.attachmentActionsService.downloadAttachment(attachment);
   }
 }

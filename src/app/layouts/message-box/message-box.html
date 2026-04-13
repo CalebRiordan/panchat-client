@@ -17,11 +17,29 @@
 
             <!-- Image -->
             <img [src]="attUI.attachment.url" [alt]="`Attachment ${i}`" (load)="onImageLoad(attUI.attachment.url)"
-                [style.display]="attUI.loaded ? 'block' : 'none'" crossorigin="anonymous" (click)="onAttachmentClick(i, $event)">
+                [style.display]="attUI.loaded ? 'block' : 'none'" crossorigin="anonymous" (click)="onViewAttachment(i, $event)">
+
+            <!-- Action buttons on hover -->
+            <div class="attachment-actions">
+                <button class="image-action-btn copy-btn" [class.copying]="copyingUrl() === attUI.attachment.url" [class.success]="copySuccessUrl() === attUI.attachment.url" [class.error]="copyErrorUrl() === attUI.attachment.url" title="Copy to clipboard" (click)="onCopyAttachment(attUI.attachment, $event)">
+                    @if(copyingUrl() === attUI.attachment.url){
+                    <span class="copy-loader"></span>
+                    } @else if(copySuccessUrl() === attUI.attachment.url){
+                    <i class="fa-solid fa-check"></i>
+                    } @else if(copyErrorUrl() === attUI.attachment.url){
+                    <i class="fa-solid fa-xmark"></i>
+                    } @else {
+                    <i class="fa-solid fa-copy"></i>
+                    }
+                </button>
+                <button class="image-action-btn download-btn" title="Download" (click)="onDownloadAttachment(attUI.attachment, $event)">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+            </div>
 
             <!-- More attachments overlay -->
             @if(i == 2 && message.attachments.length > 3){
-            <span class="more-attachments" (click)="onAttachmentClick(2, $event)">
+            <span class="more-attachments" (click)="onViewAttachment(2, $event)">
                 +{{message.attachments.length - 2}}
             </span>
             }

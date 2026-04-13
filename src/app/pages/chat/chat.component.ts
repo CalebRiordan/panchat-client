@@ -18,6 +18,7 @@ import { MessageBox } from '../../layouts/message-box/message-box';
 import { AuthService } from '../../services/auth';
 import { AttachmentsViewer } from '../../layouts/attachments-viewer/attachments-viewer';
 import { ClipboardService } from '../../services/clipboard.service.js';
+import { AttachmentActionsService } from '../../services/attachment-actions.service';
 
 interface FilePreview {
   id: number;
@@ -45,13 +46,15 @@ export const allowedTypes = [
 })
 export class ChatComponent implements OnInit, OnDestroy {
   messages = signal<Message[]>([]);
+  files = signal<FilePreview[]>([]);
+  uploadSize = 0;
+  
+  // UI state variables
+  scrollNewMessageIntoView = false;
+  filesReady = signal(false);
   initialFetch = signal(true);
   initialError = signal(false);
   sendingMessage = signal(false);
-  files = signal<FilePreview[]>([]);
-  filesReady = signal(false);
-  uploadSize = 0;
-  scrollNewMessageIntoView = false;
 
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   @ViewChild('messageInput') private messageInput!: ElementRef;
@@ -61,6 +64,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private toastService: ToastService,
     private authService: AuthService,
     private clipbardService: ClipboardService,
+    private attachmentActionsService: AttachmentActionsService,
   ) {
     // Effect for messages
     effect(() => {
@@ -76,29 +80,13 @@ export class ChatComponent implements OnInit, OnDestroy {
       const trigger = this.clipbardService.copyCommand();
       if (trigger === 0) return;
 
-      untracked(() => {
+      untracked(async () => {
         const lastMessage = this.messages().at(-1);
-        const file = lastMessage?.attachments[0];
+        const att = lastMessage?.attachments[0];
 
-        // Check if last message has file to copy - write blob to clipboard
-        if (file) {
-          let getBlobFn;
-
-          // Get blob using URL
-          switch (file.type) {
-            case 'image/png':
-              getBlobFn = async () => (await fetch(file.url)).blob();
-              break;
-            case 'image/jpeg':
-              getBlobFn = async () => convertToPngBlob(file.url);
-              break;
-
-            default:
-              // Show download option
-              return;
-          }
-
-          this.clipbardService.writeContent(getBlobFn, lastMessage.text);
+        // Check if last message has file to copy
+        if (att) {
+          await this.attachmentActionsService.copyAttachment(att, lastMessage.text);
         }
       });
     });
@@ -111,9 +99,6 @@ export class ChatComponent implements OnInit, OnDestroy {
       untracked(async () => {
         const files = this.clipbardService.pastedFiles;
         const text = this.clipbardService.pastedText;
-
-        console.log(files);
-        console.log(text);
         
         if (text) {
           setTimeout(() => {
