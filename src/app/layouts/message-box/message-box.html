@@ -2,12 +2,12 @@
         'local-message': message.deviceId == deviceId,
         'foreign-message': message.deviceId != deviceId,
         'same-device': sameDeviceAsPrevious
-    }"
-    [class.has-attachments]="attachmentUIs().length > 0">
+    }" [class.has-attachments]="attachmentUIs().length > 0">
 
     <!-- Attachments -->
     <div class="attachments-container">
         @for (attUI of attachmentUIs().slice(0, 3); track attUI.attachment.url; let i = $index){
+        @let att = attUI.attachment;
 
         <div class="attachment" [class.loading]="!attUI.loaded">
             <!-- Loading icon -->
@@ -16,30 +16,34 @@
             }
 
             <!-- Image -->
-            <img [src]="attUI.attachment.url" [alt]="`Attachment ${i}`" (load)="onImageLoad(attUI.attachment.url)"
-                [style.display]="attUI.loaded ? 'block' : 'none'" crossorigin="anonymous" (click)="onViewAttachment(i, $event)">
+            <img [src]="att.url" [alt]="`Attachment ${i}`" (load)="onImageLoad(att.url)"
+                [style.display]="attUI.loaded ? 'block' : 'none'" crossorigin="anonymous"
+                (click)="onAttachmentClick(i, $event)" [class.copying]="copyingUrl() === att.url">
 
             <!-- Action buttons on hover -->
             <div class="attachment-actions">
-                <button class="image-action-btn copy-btn" [class.copying]="copyingUrl() === attUI.attachment.url" [class.success]="copySuccessUrl() === attUI.attachment.url" [class.error]="copyErrorUrl() === attUI.attachment.url" title="Copy to clipboard" (click)="onCopyAttachment(attUI.attachment, $event)">
-                    @if(copyingUrl() === attUI.attachment.url){
+                <button class="image-action-btn copy-btn" [class.copying]="copyingUrl() === att.url"
+                    [class.success]="copySuccessUrl() === att.url" [class.error]="copyErrorUrl() === att.url"
+                    title="Copy to clipboard" (click)="copyAttachment(att, $event)">
+                    @if(copyingUrl() === att.url){
                     <span class="copy-loader"></span>
-                    } @else if(copySuccessUrl() === attUI.attachment.url){
+                    } @else if(copySuccessUrl() === att.url){
                     <i class="fa-solid fa-check"></i>
-                    } @else if(copyErrorUrl() === attUI.attachment.url){
+                    } @else if(copyErrorUrl() === att.url){
                     <i class="fa-solid fa-xmark"></i>
                     } @else {
                     <i class="fa-solid fa-copy"></i>
                     }
                 </button>
-                <button class="image-action-btn download-btn" title="Download" (click)="onDownloadAttachment(attUI.attachment, $event)">
+                <button class="image-action-btn download-btn" title="Download"
+                    (click)="onDownloadAttachment(att, $event)">
                     <i class="fa-solid fa-download"></i>
                 </button>
             </div>
 
             <!-- More attachments overlay -->
             @if(i == 2 && message.attachments.length > 3){
-            <span class="more-attachments" (click)="onViewAttachment(2, $event)">
+            <span class="more-attachments" (click)="onAttachmentClick(2, $event)">
                 +{{message.attachments.length - 2}}
             </span>
             }

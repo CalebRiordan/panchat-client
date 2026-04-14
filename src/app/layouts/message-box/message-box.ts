@@ -40,30 +40,44 @@ export class MessageBox implements OnInit {
     );
   }
 
-  onViewAttachment(index: number, event: MouseEvent) {
+  onAttachmentClick(index: number, event: MouseEvent) {
+    const isCopyClick = event.ctrlKey || event.metaKey;
+    const atms = this.attachmentUIs();
+
+    if (isCopyClick) {
+      this.copyAttachment(atms[index].attachment, event);
+    } else {
+      this.viewAttachment(index, event);
+    }
+  }
+
+  viewAttachment(index: number, event: MouseEvent) {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
     this.attachmentViewerService.show(this.attachmentUIs(), rect, index);
   }
 
-  async onCopyAttachment(attachment: AttachmentInfo, event: MouseEvent) {
+  async copyAttachment(attachment: AttachmentInfo, event: MouseEvent) {
     event.stopPropagation();
-    
+
     const url = attachment.url;
-    
+
     // Clear any existing timeout for this attachment
     if (this.copyTimeouts.has(url)) {
       clearTimeout(this.copyTimeouts.get(url)!);
       this.copyTimeouts.delete(url);
     }
-    
+
     // Set to loading state
     this.copyingUrl.set(url);
     this.copySuccessUrl.set(null);
     this.copyErrorUrl.set(null);
-    
+
     // Perform the copy action
-    const success = await this.attachmentActionsService.copyAttachment(attachment, this.message.text);
-    
+    const success = await this.attachmentActionsService.copyAttachment(
+      attachment,
+      this.message.text,
+    );
+
     // Set to success or error state
     this.copyingUrl.set(null);
     if (success) {
@@ -71,14 +85,14 @@ export class MessageBox implements OnInit {
     } else {
       this.copyErrorUrl.set(url);
     }
-    
+
     // Reset to normal state after 3 seconds
     const timeout = window.setTimeout(() => {
       this.copySuccessUrl.set(null);
       this.copyErrorUrl.set(null);
       this.copyTimeouts.delete(url);
     }, 2000);
-    
+
     this.copyTimeouts.set(url, timeout);
   }
 

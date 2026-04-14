@@ -39,18 +39,40 @@ export class AttachmentActionsService {
     }
   }
 
-  downloadAttachment(attachment: AttachmentInfo): void {
+  async downloadAttachment(attachment: AttachmentInfo): Promise<void> {
     try {
+      const response = await fetch(attachment.url, {
+        method: 'GET',
+        mode: 'cors',
+      });
+
+      if (!response.ok) throw new Error('Request for image failed');
+
+      const blob = await response.blob();
+
+      // Create a URL representing the blob data
+      const localUrl = window.URL.createObjectURL(blob);
+
       const link = document.createElement('a');
-      link.href = attachment.url;
-      link.download = this.getFilenameFromUrl(attachment.url);
+      link.href = localUrl;
+      link.download = this.getFilenameFromUrl(attachment.url) || 'download';
+
+      // Append to DOM, click
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+
+      // Cleanup (timeout ensures the browser handles the click before the URL is revoked)
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(localUrl);
+      }, 100);
+
       this.toastService.show('Download started', 'success');
     } catch (error) {
-      console.error('Error downloading attachment:', error);
-      this.toastService.show('Failed to download image', 'error');
+      console.error('Download failed:', error);
+      // If fetch fails (CORS), fall back to opening in a new tab
+      window.open(attachment.url, '_blank');
+      this.toastService.show('Opening in new tab (CORS restricted)', 'error');
     }
   }
 
