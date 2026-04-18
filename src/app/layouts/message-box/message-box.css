@@ -41,7 +41,6 @@
 
     flex-direction: row;
     gap: 1rem;
-    overflow-x: scroll;
 }
 
 .has-attachments .attachments-container {
@@ -49,11 +48,10 @@
 }
 
 .attachment {
-    background-color: var(--colour-text);
     position: relative;
     border: 1px solid var(--colour-background-variant);
     border-radius: 1.4rem;
-    height: 21vw;
+    height: 20vw;
     aspect-ratio: 3/4;
     display: flex;
     flex-shrink: 0;
@@ -64,20 +62,72 @@
     cursor: pointer;
 }
 
+.attachment.document-type {
+    height: 12vw;
+    border: 5px solid var(--colour-background-variant);
+    padding: 1rem 0.7rem;
+    box-sizing: border-box;
+}
+
+.attachment.word-icon {
+    aspect-ratio: 1.055;
+}
+
+.name-banner, .info-banner {
+    display: none;
+}
+
+.document-type .name-banner, .document-type .info-banner{
+    position: absolute;
+    top: 55%;
+    left: 0;
+    height: 2rem;
+    width: 100%;
+    padding: 0.1rem 0.5rem 0.1rem 0.5rem;
+    box-sizing: border-box;
+    line-height: 1.4rem;
+    font-size: 1.2rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    background-color: var(--colour-background-variant);
+    color: var(--colour-text);
+    opacity: 0.92;
+    display: block;
+    user-select: text;
+    letter-spacing: -0.4px;
+}
+
+.attachment.document-type .info-banner {
+    transform: translateY(2rem);
+    white-space: pre;
+}
+
 .attachment img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.attachment img.copying{
+.attachment.document-type img {
+    object-fit: contain;
+}
+
+.attachment img.copying {
     animation: dim-animation 0.4s ease-out;
 }
 
 @keyframes dim-animation {
-  0% { filter: brightness(1); }
-  50% { filter: brightness(0.6); }
-  100% { filter: brightness(1); }
+    0% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(0.6);
+    }
+
+    100% {
+        filter: brightness(1);
+    }
 }
 
 .attachment.loading {

@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { allowedTypes } from '../pages/chat/chat.component.js';
+import { ALLOWED_TYPES } from '../shared/constants.js';
 
 @Injectable({ providedIn: 'root' })
 export class ClipboardService {
@@ -17,7 +17,7 @@ export class ClipboardService {
     this.pastedText = null;
 
     // First check for any Clipboard files
-    const uploadableFiles = Array.from(data.files).filter((f) => allowedTypes.includes(f.type));
+    const uploadableFiles = Array.from(data.files).filter((f) => ALLOWED_TYPES.includes(f.type));
     if (uploadableFiles.length > 0) {
       this.pastedFiles = uploadableFiles;
     }

@@ -4,6 +4,8 @@ import { DataService } from '../../services/data.service';
 import { AttachmentInfo, AttachmentUI } from '../../models/attachment';
 import { AttachmentsViewerService } from '../../services/attachments-viewer.service';
 import { AttachmentActionsService } from '../../services/attachment-actions.service';
+import { DOCUMENT_TYPES } from '../../shared/constants.js';
+import { isPdf, isWord, urlFor } from '../../shared/utils.js';
 
 @Component({
   selector: 'app-message-box',
@@ -17,6 +19,7 @@ export class MessageBox implements OnInit {
   copyingUrl = signal<string | null>(null);
   copySuccessUrl = signal<string | null>(null);
   copyErrorUrl = signal<string | null>(null);
+  urlFor = (att: AttachmentInfo) => urlFor(att.type, att.url);
   private copyTimeouts = new Map<string, number>();
 
   @Input() message!: Message;
@@ -99,5 +102,28 @@ export class MessageBox implements OnInit {
   onDownloadAttachment(attachment: AttachmentInfo, event: MouseEvent) {
     event.stopPropagation();
     this.attachmentActionsService.downloadAttachment(attachment);
+  }
+
+  isDocumentType(attachment: AttachmentInfo) {
+    return DOCUMENT_TYPES.includes(attachment.type);
+  }
+
+  formatInfo(att: AttachmentInfo) {
+    let s = '';
+    if (att.pageCount) {
+      s = `${att.pageCount} pages  `;
+    }
+
+    let type = '';
+    if (isPdf(att.type, att.filename)) {
+      type = '  PDF';
+    } else if (isWord(att.type, att.filename)) {
+      type = '  DOCX';
+    }
+
+    const sizeMB = Math.round((att.size / 1024 / 1024) * 10) / 10;
+    s += `${sizeMB}MB${type}`;
+
+    return s;
   }
 }

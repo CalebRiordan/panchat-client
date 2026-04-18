@@ -7,6 +7,9 @@ export interface Attachment {
 export interface AttachmentInfo {
   url: string,
   type: string,
+  filename: string,
+  pageCount?: number,
+  size: number,
   dateTimeSent: Date,
   messageId: string,
   queueOrder?: Number

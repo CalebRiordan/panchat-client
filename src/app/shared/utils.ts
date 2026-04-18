@@ -1,8 +1,11 @@
 import { heicTo } from 'heic-to';
 import * as pdfjsLib from 'pdfjs-dist';
+import { WEB_SAFE_IMAGE_TYPES, WORD_MIME } from './constants.js';
+import { renderAsync } from 'docx-preview';
+import html2canvas from 'html2canvas';
+import { AttachmentInfo } from '../models/attachment.js';
 
 // Point to the worker on a CDN so your main bundle stays small
-const pdfjsVersion = pdfjsLib.version;
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 export function generateGuid() {
@@ -45,23 +48,68 @@ export async function getUrlFromPdf(file: File): Promise<string> {
   return '';
 }
 
+export async function getUrlFromWord(file: File): Promise<string> {
+  const container = document.createElement('div');
+  // Hide it from the user's view
+  container.style.position = 'absolute';
+  container.style.left = '-9999px';
+  document.body.appendChild(container);
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+
+    // Render the document
+    await renderAsync(arrayBuffer, container, undefined, {
+      breakPages: true, // Ensures page breaks are respected
+    });
+
+    // Find the first "page" - docx-preview wraps pages in section tags
+    const firstPage = container.querySelector('section');
+
+    if (!firstPage) {
+      throw new Error('Could not find content in Word document.');
+    }
+
+    firstPage.style.height = "1000px";
+
+    // Capture only the first page element
+    const canvas = await html2canvas(firstPage as HTMLElement, {
+      logging: false,
+      scale: 0.5,
+      useCORS: true,
+      y: 0,
+    });
+
+    const result = canvas.toDataURL('image/png', 0.7);
+    return result;
+  } catch (error) {
+    console.error('Word preview error:', error);
+    return '';
+  } finally {
+    // Always clean up
+    if (document.body.contains(container)) {
+      document.body.removeChild(container);
+    }
+  }
+}
+
 export async function convertToPngBlob(url: string): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     // Must allow cross-origin for the canvas to not become "tainted"
-    img.crossOrigin = 'anonymous'; 
+    img.crossOrigin = 'anonymous';
     img.src = url;
 
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
       canvas.height = img.height;
-      
+
       const ctx = canvas.getContext('2d');
       if (!ctx) return reject('Failed to get canvas context');
-      
+
       ctx.drawImage(img, 0, 0);
-      
+
       // Export specifically as image/png
       canvas.toBlob((blob) => {
         if (blob) resolve(blob);
@@ -84,3 +132,38 @@ export async function getUrlFromHeic(file: File): Promise<string> {
   const jpgBlob = Array.isArray(blobArray) ? blobArray[0] : blobArray;
   return URL.createObjectURL(jpgBlob);
 }
+
+export function isPdf(type: string, filename: string) {
+  return type === 'application/pdf' || extensionIs('pdf', filename);
+}
+
+export function isWord(type: string, filename: string) {
+  return (
+    type === 'application/msword' ||
+    type === WORD_MIME ||
+    extensionIs('docx', filename) ||
+    extensionIs('doc', filename)
+  );
+}
+
+function extensionIs(extension: string, filename: string) {
+  return filename.toLowerCase().endsWith(`.${extension}`);
+}
+
+  export function urlFor(type: string, defaultUrl = '') {
+    if (!WEB_SAFE_IMAGE_TYPES.includes(type)) {
+      switch (type) {
+        case WORD_MIME:
+          return '/assets/icons/word-icon.png';
+
+        case 'application/pdf':
+          return '/assets/icons/pdf-icon.png';
+
+        default:
+          // this.toast.show(`Unsupported attachment type '${type}'`, 'error');
+          return '';
+      }
+    }
+
+    return defaultUrl;
+  }

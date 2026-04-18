@@ -15,9 +15,9 @@
             <span class="dot-pulse"></span>
         </div>
         } @else if (initialError()) {
-            <div class="retrieval-failed-text">An error occured while trying to retrieve messages!</div>
+        <div class="retrieval-failed-text">An error occured while trying to retrieve messages!</div>
         } @else {
-            <div class="retrieval-failed-text">There are no messages on this chat yet</div>
+        <div class="retrieval-failed-text">There are no messages on this chat yet</div>
         }
         }
     </div>
@@ -32,6 +32,12 @@
                     <span class="preview-loader"></span>
                     }
 
+                    @if (isDocument(preview.file.type)){
+                        <div class="doctype-badge">
+                            <img [src]="urlFor(preview)" [alt]="preview.filename">
+                        </div>
+                    }
+
                     <img [src]="preview.url" [alt]="preview.filename" (load)="onImageLoad(preview.id)"
                         [style.display]="preview.loaded ? 'block' : 'none'">
                     <div class="btn-remove-preview" (click)="onRemoveFile(preview.id)">X</div>
@@ -39,6 +45,7 @@
                 </div>
                 }
             </div>
+            <div class="btn-remove-previews" (click)="onRemoveAllPreviews()">X</div>
         </div>
 
         <!-- ================ Create message textbox ================ -->
@@ -64,7 +71,8 @@
     </div>
 
     <!-- Hidden file input -->
-    <input hidden type="file" #fileInput accept="image/*, application/pdf" multiple (change)="onFilesSelected($event)">
+    <input hidden type="file" #fileInput accept="image/*, {{docTypes.join(', ')}}" multiple
+        (change)="onFilesSelected($event)">
 </div>
 
 <app-attachments-viewer></app-attachments-viewer>

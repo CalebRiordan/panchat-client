@@ -8,18 +8,26 @@
     <div class="attachments-container">
         @for (attUI of attachmentUIs().slice(0, 3); track attUI.attachment.url; let i = $index){
         @let att = attUI.attachment;
+        @let url = urlFor(att);
 
-        <div class="attachment" [class.loading]="!attUI.loaded">
+        <div class="attachment" [class.loading]="!attUI.loaded" [class.word-icon]="url.includes('word-icon')"
+            [class.document-type]="isDocumentType(att)">
             <!-- Loading icon -->
             @if(!attUI.loaded){
             <span class="attachment-loader"></span>
             }
 
             <!-- Image -->
-            <img [src]="att.url" [alt]="`Attachment ${i}`" (load)="onImageLoad(att.url)"
+            <img [src]="url" [alt]="`Attachment ${i}`" (load)="onImageLoad(att.url)"
                 [style.display]="attUI.loaded ? 'block' : 'none'" crossorigin="anonymous"
                 (click)="onAttachmentClick(i, $event)" [class.copying]="copyingUrl() === att.url">
 
+            <!-- More attachments overlay -->
+            @if(i == 2 && message.attachments.length > 2){
+            <span class="more-attachments" (click)="onAttachmentClick(2, $event)">
+                +{{message.attachments.length - 2}}
+            </span>
+            } @else {
             <!-- Action buttons on hover -->
             <div class="attachment-actions">
                 <button class="image-action-btn copy-btn" [class.copying]="copyingUrl() === att.url"
@@ -41,11 +49,10 @@
                 </button>
             </div>
 
-            <!-- More attachments overlay -->
-            @if(i == 2 && message.attachments.length > 3){
-            <span class="more-attachments" (click)="onAttachmentClick(2, $event)">
-                +{{message.attachments.length - 2}}
-            </span>
+            <!-- Name banner -->
+            <div class="name-banner" [attr.tooltip]="att.filename">{{att.filename}}</div>
+            @let infoString = formatInfo(att);
+            <div class="info-banner" [attr.tooltip]="infoString">{{infoString}}</div>
             }
         </div>
         }

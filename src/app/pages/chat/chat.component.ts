@@ -12,13 +12,22 @@ import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
 import { finalize } from 'rxjs';
-import { convertToPngBlob, getUrlFromHeic, getUrlFromPdf } from '../../shared/utils';
+import {
+  getUrlFromHeic,
+  getUrlFromPdf,
+  getUrlFromWord,
+  isPdf,
+  isWord,
+  urlFor,
+} from '../../shared/utils';
 import { isHeic } from 'heic-to';
 import { MessageBox } from '../../layouts/message-box/message-box';
 import { AuthService } from '../../services/auth';
 import { AttachmentsViewer } from '../../layouts/attachments-viewer/attachments-viewer';
 import { ClipboardService } from '../../services/clipboard.service.js';
 import { AttachmentActionsService } from '../../services/attachment-actions.service';
+import { ALLOWED_TYPES, DOCUMENT_TYPES } from '../../shared/constants.js';
+import { AttachmentInfo } from '../../models/attachment.js';
 
 interface FilePreview {
   id: number;
@@ -27,16 +36,6 @@ interface FilePreview {
   file: File;
   loaded: Boolean;
 }
-
-export const allowedTypes = [
-  'image/png',
-  'image/jpeg',
-  'image/heic',
-  'image/webp',
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-];
 
 @Component({
   selector: 'app-chat',
@@ -48,7 +47,12 @@ export class ChatComponent implements OnInit, OnDestroy {
   messages = signal<Message[]>([]);
   files = signal<FilePreview[]>([]);
   uploadSize = 0;
-  
+
+  // Shared imports for use in HTML template
+  docTypes = DOCUMENT_TYPES;
+  isDocument = (type: string) => this.docTypes.includes(type);
+  urlFor = (preview: FilePreview) => urlFor(preview.file.type);
+
   // UI state variables
   scrollNewMessageIntoView = false;
   filesReady = signal(false);
@@ -61,7 +65,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   constructor(
     private messageService: MessageService,
-    private toastService: ToastService,
+    private toast: ToastService,
     private authService: AuthService,
     private clipbardService: ClipboardService,
     private attachmentActionsService: AttachmentActionsService,
@@ -99,7 +103,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       untracked(async () => {
         const files = this.clipbardService.pastedFiles;
         const text = this.clipbardService.pastedText;
-        
+
         if (text) {
           setTimeout(() => {
             this.messageInput.nativeElement.value = text;
@@ -125,10 +129,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Error occurred while trying to retrieve messages: ' + err.message);
-          this.toastService.show(
-            'An error occurred trying to fetch message for this account',
-            'error',
-          );
+          this.toast.show('An error occurred trying to fetch message for this account', 'error');
           this.initialFetch.set(false);
           this.initialError.set(true);
         },
@@ -203,7 +204,7 @@ export class ChatComponent implements OnInit, OnDestroy {
           },
           error: (err) => {
             console.error(err);
-            this.toastService.show('An error occurred while trying to send your message', 'error');
+            this.toast.show('An error occurred while trying to send your message', 'error');
           },
         });
     }
@@ -247,17 +248,15 @@ export class ChatComponent implements OnInit, OnDestroy {
       }
 
       // Unsupported file type error
-      let invalidIds = [];
-      previews.filter((preview) => {
+      let invalidIds: number[] = [];
+      previews.filter(async (preview) => {
         const type = preview.file.type;
-        const isWordDoc =
-          type === 'application/msword' ||
-          type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-          this.extensionIs('docx', preview) ||
-          this.extensionIs('doc', preview);
-        const isHeic = type === 'image/heic' || this.extensionIs('heic', preview);
 
-        if (allowedTypes.includes(type) || isWordDoc || isHeic) {
+        if (
+          ALLOWED_TYPES.includes(type) ||
+          isWord(type, preview.filename) ||
+          (await isHeic(preview.file))
+        ) {
           return true;
         }
 
@@ -266,10 +265,13 @@ export class ChatComponent implements OnInit, OnDestroy {
       });
 
       if (invalidIds.length == 1) {
-        // alert file ${name} is of unsupported type ${type}
+        const invalidFile = previews.find((p) => p.id === invalidIds[0])!;
+        this.toast.show(
+          `${invalidFile.filename} is of unsupported type '${invalidFile.file.type}'`,
+        );
         return;
       } else if (invalidIds.length > 1) {
-        // alert ${invalidIds.length} files of unsupported formats
+        this.toast.show(`${invalidIds.length} files of unsupported formats`);
         return;
       }
     }
@@ -283,15 +285,16 @@ export class ChatComponent implements OnInit, OnDestroy {
     // ========================================
     const previewsWithUrls = await Promise.all(
       previews.map(async (p) => {
-        const isPdf = p.file.type === 'application/pdf' || this.extensionIs('pdf', p);
-
-        if (await isHeic(p.file)) {
-          p.url = await getUrlFromHeic(p.file);
-        } else if (isPdf) {
-          p.url = await getUrlFromPdf(p.file);
+        const f = p.file;
+        if (await isHeic(f)) {
+          p.url = await getUrlFromHeic(f);
+        } else if (isPdf(f.type, p.filename)) {
+          p.url = await getUrlFromPdf(f);
+        } else if (isWord(f.type, p.filename)) {
+          p.url = await getUrlFromWord(f);
         } else {
           // NOT ASYNC - room for optimization?
-          p.url = URL.createObjectURL(p.file);
+          p.url = URL.createObjectURL(f);
         }
 
         return p;
@@ -314,8 +317,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.files.update((current) => current.filter((p) => p.id != id));
   }
 
-  private extensionIs(extension: string, preview: FilePreview) {
-    return preview.filename.toLowerCase().endsWith(`.${extension}`);
+  onRemoveAllPreviews() {
+    this.files.set([]);
   }
 
   onLogout() {
