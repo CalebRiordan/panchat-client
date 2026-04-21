@@ -4,22 +4,24 @@ import { DataService } from '../../services/data.service';
 import { AttachmentInfo, AttachmentUI } from '../../models/attachment';
 import { AttachmentsViewerService } from '../../services/attachments-viewer.service';
 import { AttachmentActionsService } from '../../services/attachment-actions.service';
+import { AttachmentComponent } from '../attachment/attachment';
 import { DOCUMENT_TYPES } from '../../shared/constants.js';
 import { isPdf, isWord, urlFor } from '../../shared/utils.js';
+import { isSupportedImage } from 'html2canvas/dist/types/css/types/image.js';
 
 @Component({
   selector: 'app-message-box',
-  imports: [],
+  imports: [AttachmentComponent],
   templateUrl: './message-box.html',
   styleUrl: './message-box.css',
 })
 export class MessageBox implements OnInit {
   deviceId!: string;
-  attachmentUIs = signal<AttachmentUI[]>([]);
+  imageUIs = signal<AttachmentUI[]>([]);
+  docUIs = signal<AttachmentUI[]>([]);
   copyingUrl = signal<string | null>(null);
   copySuccessUrl = signal<string | null>(null);
   copyErrorUrl = signal<string | null>(null);
-  urlFor = (att: AttachmentInfo) => urlFor(att.type, att.url);
   private copyTimeouts = new Map<string, number>();
 
   @Input() message!: Message;
@@ -34,18 +36,35 @@ export class MessageBox implements OnInit {
   }
 
   ngOnInit(): void {
-    this.attachmentUIs.set(this.message.attachments.map((a) => ({ attachment: a, loaded: false })));
+    const atts = this.message.attachments;
+    
+    // Separate attachments into images and docs
+    const { images, docs } = atts.reduce(
+      (acc, att) => {
+        if (this.isDocumentType(att)) {
+          acc.docs.push({ attachment: att, loaded: false });
+        } else {
+          acc.images.push({ attachment: att, loaded: false });
+        }
+
+        return acc;
+      },
+      { docs: [] as AttachmentUI[], images: [] as AttachmentUI[] },
+    );
+
+    this.imageUIs.set(images);
+    this.docUIs.set(docs);
   }
 
   onImageLoad(url: string) {
-    this.attachmentUIs.update((atts) =>
+    this.imageUIs.update((atts) =>
       atts.map((a) => (a.attachment.url == url ? { ...a, loaded: true } : a)),
     );
   }
 
   onAttachmentClick(index: number, event: MouseEvent) {
     const isCopyClick = event.ctrlKey || event.metaKey;
-    const atms = this.attachmentUIs();
+    const atms = this.imageUIs();
 
     if (isCopyClick) {
       this.copyAttachment(atms[index].attachment, event);
@@ -56,7 +75,7 @@ export class MessageBox implements OnInit {
 
   viewAttachment(index: number, event: MouseEvent) {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
-    this.attachmentViewerService.show(this.attachmentUIs(), rect, index);
+    this.attachmentViewerService.show(this.imageUIs(), rect, index);
   }
 
   async copyAttachment(attachment: AttachmentInfo, event: MouseEvent) {
@@ -106,24 +125,5 @@ export class MessageBox implements OnInit {
 
   isDocumentType(attachment: AttachmentInfo) {
     return DOCUMENT_TYPES.includes(attachment.type);
-  }
-
-  formatInfo(att: AttachmentInfo) {
-    let s = '';
-    if (att.pageCount) {
-      s = `${att.pageCount} pages  `;
-    }
-
-    let type = '';
-    if (isPdf(att.type, att.filename)) {
-      type = '  PDF';
-    } else if (isWord(att.type, att.filename)) {
-      type = '  DOCX';
-    }
-
-    const sizeMB = Math.round((att.size / 1024 / 1024) * 10) / 10;
-    s += `${sizeMB}MB${type}`;
-
-    return s;
   }
 }

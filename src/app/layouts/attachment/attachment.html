@@ -1,0 +1,45 @@
+<div class="attachment" [class.loading]="!attachmentUI.loaded" [class.word-icon]="urlFor(attachmentUI.attachment).includes('word-icon')"
+    [class.document-type]="isDocumentType">
+    <!-- Loading icon -->
+    @if(!attachmentUI.loaded){
+    <span class="attachment-loader"></span>
+    }
+
+    <!-- Image -->
+    <img [src]="urlFor(attachmentUI.attachment)" [alt]="`Attachment ${index}`" (load)="onImageLoad(attachmentUI.attachment.url)"
+        [style.display]="attachmentUI.loaded ? 'block' : 'none'" crossorigin="anonymous"
+        (click)="onAttachmentClick($event)" [class.copying]="copyingUrl === attachmentUI.attachment.url">
+
+    <!-- More attachments overlay -->
+    @if(shouldShowMoreOverlay()){
+    <span class="more-attachments" (click)="onAttachmentClick($event)">
+        +{{getMoreCount()}}
+    </span>
+    } @else {
+    <!-- Action buttons on hover -->
+    <div class="attachment-actions">
+        <button class="image-action-btn copy-btn" [class.copying]="copyingUrl === attachmentUI.attachment.url"
+            [class.success]="copySuccessUrl === attachmentUI.attachment.url" [class.error]="copyErrorUrl === attachmentUI.attachment.url"
+            title="Copy to clipboard" (click)="onCopyClick(attachmentUI.attachment, $event)">
+            @if(copyingUrl === attachmentUI.attachment.url){
+            <span class="copy-loader"></span>
+            } @else if(copySuccessUrl === attachmentUI.attachment.url){
+            <i class="fa-solid fa-check"></i>
+            } @else if(copyErrorUrl === attachmentUI.attachment.url){
+            <i class="fa-solid fa-xmark"></i>
+            } @else {
+            <i class="fa-solid fa-copy"></i>
+            }
+        </button>
+        <button class="image-action-btn download-btn" title="Download"
+            (click)="onDownloadClick(attachmentUI.attachment, $event)">
+            <i class="fa-solid fa-download"></i>
+        </button>
+    </div>
+
+    <!-- Name banner -->
+    <div class="name-banner" [attr.tooltip]="attachmentUI.attachment.filename">{{attachmentUI.attachment.filename}}</div>
+    @let infoString = formatInfo(attachmentUI.attachment);
+    <div class="info-banner" [attr.tooltip]="infoString">{{infoString}}</div>
+    }
+</div>

@@ -1,0 +1,198 @@
+.attachment {
+    position: relative;
+    border: 1px solid var(--colour-background-variant);
+    border-radius: 1.4rem;
+    height: 20vw;
+    aspect-ratio: 3/4;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    user-select: none;
+    cursor: pointer;
+}
+
+.attachment.document-type {
+    height: 12vw;
+    border: 5px solid var(--colour-background-variant);
+    padding: 1rem 0.7rem;
+    box-sizing: border-box;
+}
+
+.attachment.word-icon {
+    aspect-ratio: 1.055;
+}
+
+.name-banner, .info-banner {
+    display: none;
+}
+
+.document-type .name-banner, .document-type .info-banner{
+    position: absolute;
+    top: 55%;
+    left: 0;
+    height: 2rem;
+    width: 100%;
+    padding: 0.1rem 0.5rem 0.1rem 0.5rem;
+    box-sizing: border-box;
+    line-height: 1.4rem;
+    font-size: 1.2rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    background-color: var(--colour-background-variant);
+    color: var(--colour-text);
+    opacity: 0.92;
+    display: block;
+    user-select: text;
+    letter-spacing: -0.4px;
+}
+
+.attachment.document-type .info-banner {
+    transform: translateY(2rem);
+    white-space: pre;
+}
+
+.attachment img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.attachment.document-type img {
+    object-fit: contain;
+}
+
+.attachment img.copying {
+    animation: dim-animation 0.4s ease-out;
+}
+
+@keyframes dim-animation {
+    0% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(0.6);
+    }
+
+    100% {
+        filter: brightness(1);
+    }
+}
+
+.attachment.loading {
+    background-color: var(--colour-background);
+}
+
+.attachment-loader {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid var(--colour-text);
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+.more-attachments {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    width: 100%;
+    background-color: var(--colour-background-variant);
+    opacity: 0.85;
+    font-size: 4rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.attachment-actions {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.1s ease-in-out;
+    z-index: 10;
+}
+
+.attachment:hover .attachment-actions {
+    opacity: 1;
+}
+
+.image-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--colour-background-variant);
+    color: var(--colour-text);
+    cursor: pointer;
+    font-size: 1.8rem;
+    opacity: 0.75;
+    transition: opacity 0.1s ease-in-out;
+    padding: 0;
+}
+
+.image-action-btn:hover {
+    opacity: 1;
+}
+
+.image-action-btn:active {
+    transform: scale(0.95);
+}
+
+.copy-loader {
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 2px solid var(--colour-text);
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: spin 0.8s linear infinite;
+}
+
+.image-action-btn.copying,
+.image-action-btn.copying:hover {
+    opacity: 0.6;
+}
+
+.image-action-btn.success {
+    color: #29b262;
+    opacity: 1;
+}
+
+.image-action-btn.error {
+    color: #c64133;
+    opacity: 1;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

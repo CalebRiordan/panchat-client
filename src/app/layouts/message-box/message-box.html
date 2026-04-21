@@ -2,59 +2,42 @@
         'local-message': message.deviceId == deviceId,
         'foreign-message': message.deviceId != deviceId,
         'same-device': sameDeviceAsPrevious
-    }" [class.has-attachments]="attachmentUIs().length > 0">
+    }" [class.has-attachments]="imageUIs().length > 0 || docUIs().length > 0">
 
     <!-- Attachments -->
     <div class="attachments-container">
-        @for (attUI of attachmentUIs().slice(0, 3); track attUI.attachment.url; let i = $index){
-        @let att = attUI.attachment;
-        @let url = urlFor(att);
+        <!-- Images -->
+        @for (imgUI of imageUIs().slice(0, 3); track imgUI.attachment.url; let i = $index){
+        <app-attachment 
+            [attachmentUI]="imgUI"
+            [index]="i"
+            [totalCount]="imageUIs().length"
+            [isDocumentType]="false"
+            [copyingUrl]="copyingUrl()"
+            [copySuccessUrl]="copySuccessUrl()"
+            [copyErrorUrl]="copyErrorUrl()"
+            (attachmentClick)="onAttachmentClick(i, $event)"
+            (copyClick)="copyAttachment(imgUI.attachment, $event)"
+            (downloadClick)="onDownloadAttachment(imgUI.attachment, $event)"
+            (imageLoad)="onImageLoad($event)">
+        </app-attachment>
+        }
 
-        <div class="attachment" [class.loading]="!attUI.loaded" [class.word-icon]="url.includes('word-icon')"
-            [class.document-type]="isDocumentType(att)">
-            <!-- Loading icon -->
-            @if(!attUI.loaded){
-            <span class="attachment-loader"></span>
-            }
-
-            <!-- Image -->
-            <img [src]="url" [alt]="`Attachment ${i}`" (load)="onImageLoad(att.url)"
-                [style.display]="attUI.loaded ? 'block' : 'none'" crossorigin="anonymous"
-                (click)="onAttachmentClick(i, $event)" [class.copying]="copyingUrl() === att.url">
-
-            <!-- More attachments overlay -->
-            @if(i == 2 && message.attachments.length > 2){
-            <span class="more-attachments" (click)="onAttachmentClick(2, $event)">
-                +{{message.attachments.length - 2}}
-            </span>
-            } @else {
-            <!-- Action buttons on hover -->
-            <div class="attachment-actions">
-                <button class="image-action-btn copy-btn" [class.copying]="copyingUrl() === att.url"
-                    [class.success]="copySuccessUrl() === att.url" [class.error]="copyErrorUrl() === att.url"
-                    title="Copy to clipboard" (click)="copyAttachment(att, $event)">
-                    @if(copyingUrl() === att.url){
-                    <span class="copy-loader"></span>
-                    } @else if(copySuccessUrl() === att.url){
-                    <i class="fa-solid fa-check"></i>
-                    } @else if(copyErrorUrl() === att.url){
-                    <i class="fa-solid fa-xmark"></i>
-                    } @else {
-                    <i class="fa-solid fa-copy"></i>
-                    }
-                </button>
-                <button class="image-action-btn download-btn" title="Download"
-                    (click)="onDownloadAttachment(att, $event)">
-                    <i class="fa-solid fa-download"></i>
-                </button>
-            </div>
-
-            <!-- Name banner -->
-            <div class="name-banner" [attr.tooltip]="att.filename">{{att.filename}}</div>
-            @let infoString = formatInfo(att);
-            <div class="info-banner" [attr.tooltip]="infoString">{{infoString}}</div>
-            }
-        </div>
+        <!-- Documents -->
+        @for (docUI of docUIs().slice(0, 4); track docUI.attachment.url; let i = $index){
+        <app-attachment 
+            [attachmentUI]="docUI"
+            [index]="i"
+            [totalCount]="docUIs().length"
+            [isDocumentType]="true"
+            [copyingUrl]="copyingUrl()"
+            [copySuccessUrl]="copySuccessUrl()"
+            [copyErrorUrl]="copyErrorUrl()"
+            (attachmentClick)="onAttachmentClick(imageUIs().length + i, $event)"
+            (copyClick)="copyAttachment(docUI.attachment, $event)"
+            (downloadClick)="onDownloadAttachment(docUI.attachment, $event)"
+            (imageLoad)="onImageLoad($event)">
+        </app-attachment>
         }
     </div>
 
