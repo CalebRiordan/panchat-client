@@ -1,10 +1,14 @@
-@if (avs.attachmentUIs().length > 0){
+@if (avs.imageUIs().length > 0 || document){
 <div class="attachments-viewer" [class.viewer-visible]="visible()">
     <div class="close-button" (click)="avs.clear()">X</div>
 
     <div #viewer class="images-container">
-        @for (att of avs.attachmentUIs(); track "avs_" + att.attachment.url) {
-        <img #image [src]="att.attachment.url" crossorigin="anonymous">
+        @for (att of avs.imageUIs(); track "avs_" + att.attachment.url) {
+        <img #image [src]="urlFor(att)" crossorigin="anonymous">
+        }
+
+        @if (documentContent()) {
+          <div #pdfContainer class="document-viewer"></div>
         }
     </div>
 </div>

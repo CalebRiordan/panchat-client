@@ -55,7 +55,7 @@ export class AttachmentActionsService {
 
       const link = document.createElement('a');
       link.href = localUrl;
-      link.download = this.getFilenameFromUrl(attachment.url) || 'download';
+      link.download = attachment.filename;
 
       // Append to DOM, click
       document.body.appendChild(link);
@@ -73,16 +73,6 @@ export class AttachmentActionsService {
       // If fetch fails (CORS), fall back to opening in a new tab
       window.open(attachment.url, '_blank');
       this.toastService.show('Opening in new tab (CORS restricted)', 'error');
-    }
-  }
-
-  private getFilenameFromUrl(url: string): string {
-    try {
-      const urlObj = new URL(url);
-      const pathname = urlObj.pathname;
-      return pathname.substring(pathname.lastIndexOf('/') + 1) || 'download';
-    } catch {
-      return 'download';
     }
   }
 }

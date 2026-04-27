@@ -1,45 +1,47 @@
-<div class="attachment" [class.loading]="!attachmentUI.loaded" [class.word-icon]="urlFor(attachmentUI.attachment).includes('word-icon')"
-    [class.document-type]="isDocumentType">
+@let att = attachmentUI().attachment;
+<div class="attachment" [class.loading]="!attachmentUI().loaded" [class.word-icon]="urlFor(att).includes('word-icon')"
+    [class.document-type]="attachmentUI().type == 'doc'">
     <!-- Loading icon -->
-    @if(!attachmentUI.loaded){
+    @if(!attachmentUI().loaded){
     <span class="attachment-loader"></span>
     }
 
     <!-- Image -->
-    <img [src]="urlFor(attachmentUI.attachment)" [alt]="`Attachment ${index}`" (load)="onImageLoad(attachmentUI.attachment.url)"
-        [style.display]="attachmentUI.loaded ? 'block' : 'none'" crossorigin="anonymous"
-        (click)="onAttachmentClick($event)" [class.copying]="copyingUrl === attachmentUI.attachment.url">
+    <img [src]="urlFor(att)" [alt]="`Attachment ${index}`" (load)="onImageLoad()"
+        [style.display]="attachmentUI().loaded ? 'block' : 'none'" crossorigin="anonymous"
+        (click)="onAttachmentClick(att, $event)" [class.copying]="copyingUrl() === att.url">
 
     <!-- More attachments overlay -->
     @if(shouldShowMoreOverlay()){
-    <span class="more-attachments" (click)="onAttachmentClick($event)">
+    <span class="more-attachments" (click)="onAttachmentClick(att, $event)">
         +{{getMoreCount()}}
     </span>
     } @else {
     <!-- Action buttons on hover -->
     <div class="attachment-actions">
-        <button class="image-action-btn copy-btn" [class.copying]="copyingUrl === attachmentUI.attachment.url"
-            [class.success]="copySuccessUrl === attachmentUI.attachment.url" [class.error]="copyErrorUrl === attachmentUI.attachment.url"
-            title="Copy to clipboard" (click)="onCopyClick(attachmentUI.attachment, $event)">
-            @if(copyingUrl === attachmentUI.attachment.url){
+        @if (attachmentUI().type === 'img'){
+        <button class="image-action-btn copy-btn" [class.copying]="copyingUrl() === att.url"
+            [class.success]="copySuccessUrl() === att.url" [class.error]="copyErrorUrl() === att.url"
+            title="Copy to clipboard" (click)="onCopyClick(att)">
+            @if(copyingUrl() === att.url){
             <span class="copy-loader"></span>
-            } @else if(copySuccessUrl === attachmentUI.attachment.url){
+            } @else if(copySuccessUrl() === att.url){
             <i class="fa-solid fa-check"></i>
-            } @else if(copyErrorUrl === attachmentUI.attachment.url){
+            } @else if(copyErrorUrl() === att.url){
             <i class="fa-solid fa-xmark"></i>
             } @else {
             <i class="fa-solid fa-copy"></i>
             }
         </button>
-        <button class="image-action-btn download-btn" title="Download"
-            (click)="onDownloadClick(attachmentUI.attachment, $event)">
+        }
+        <button class="image-action-btn download-btn" title="Download" (click)="onDownloadClick(att)">
             <i class="fa-solid fa-download"></i>
         </button>
     </div>
 
     <!-- Name banner -->
-    <div class="name-banner" [attr.tooltip]="attachmentUI.attachment.filename">{{attachmentUI.attachment.filename}}</div>
-    @let infoString = formatInfo(attachmentUI.attachment);
+    <div class="name-banner" [attr.tooltip]="att.filename">{{att.filename}}</div>
+    @let infoString = formatInfo(att);
     <div class="info-banner" [attr.tooltip]="infoString">{{infoString}}</div>
     }
 </div>

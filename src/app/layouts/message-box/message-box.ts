@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, signal } from '@angular/core';
+import { Component, computed, Input, OnInit, signal } from '@angular/core';
 import { Message } from '../../models/message';
 import { DataService } from '../../services/data.service';
 import { AttachmentInfo, AttachmentUI } from '../../models/attachment';
@@ -6,8 +6,6 @@ import { AttachmentsViewerService } from '../../services/attachments-viewer.serv
 import { AttachmentActionsService } from '../../services/attachment-actions.service';
 import { AttachmentComponent } from '../attachment/attachment';
 import { DOCUMENT_TYPES } from '../../shared/constants.js';
-import { isPdf, isWord, urlFor } from '../../shared/utils.js';
-import { isSupportedImage } from 'html2canvas/dist/types/css/types/image.js';
 
 @Component({
   selector: 'app-message-box',
@@ -16,13 +14,11 @@ import { isSupportedImage } from 'html2canvas/dist/types/css/types/image.js';
   styleUrl: './message-box.css',
 })
 export class MessageBox implements OnInit {
+  atts: AttachmentInfo[] = [];
+  attUIs = signal<AttachmentUI[]>([]);
   deviceId!: string;
-  imageUIs = signal<AttachmentUI[]>([]);
-  docUIs = signal<AttachmentUI[]>([]);
-  copyingUrl = signal<string | null>(null);
-  copySuccessUrl = signal<string | null>(null);
-  copyErrorUrl = signal<string | null>(null);
-  private copyTimeouts = new Map<string, number>();
+  readonly imageUIs = computed(() => this.attUIs().filter((a) => a.type === 'img'));
+  readonly docUIs = computed(() => this.attUIs().filter((a) => a.type === 'doc'));
 
   @Input() message!: Message;
   @Input() sameDeviceAsPrevious!: Boolean;
@@ -36,91 +32,36 @@ export class MessageBox implements OnInit {
   }
 
   ngOnInit(): void {
-    const atts = this.message.attachments;
-    
-    // Separate attachments into images and docs
-    const { images, docs } = atts.reduce(
-      (acc, att) => {
-        if (this.isDocumentType(att)) {
-          acc.docs.push({ attachment: att, loaded: false });
-        } else {
-          acc.images.push({ attachment: att, loaded: false });
-        }
+    const attUIs = this.message.attachments.map((a, index) => {
+      const type: 'doc' | 'img' = this.isDocumentType(a) ? 'doc' : 'img';
+      return { attachment: a, loaded: false, type, index };
+    });
 
-        return acc;
-      },
-      { docs: [] as AttachmentUI[], images: [] as AttachmentUI[] },
-    );
-
-    this.imageUIs.set(images);
-    this.docUIs.set(docs);
+    this.attUIs.set(attUIs);
   }
 
-  onImageLoad(url: string) {
-    this.imageUIs.update((atts) =>
-      atts.map((a) => (a.attachment.url == url ? { ...a, loaded: true } : a)),
-    );
-  }
+  async onCopy(att: AttachmentInfo) {
+    const success = await this.attachmentActionsService.copyAttachment(att, this.message.text);
 
-  onAttachmentClick(index: number, event: MouseEvent) {
-    const isCopyClick = event.ctrlKey || event.metaKey;
-    const atms = this.imageUIs();
+    this.attUIs.update((atts) => {
+      return atts.map((a) => (a.attachment.url == att.url ? { ...a, copied: success } : a));
+    });
 
-    if (isCopyClick) {
-      this.copyAttachment(atms[index].attachment, event);
+    if (success) {
+      console.log('Successfully copied image and text');
     } else {
-      this.viewAttachment(index, event);
+      // TODO: Show toast error
     }
   }
 
   viewAttachment(index: number, event: MouseEvent) {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
-    this.attachmentViewerService.show(this.imageUIs(), rect, index);
-  }
-
-  async copyAttachment(attachment: AttachmentInfo, event: MouseEvent) {
-    event.stopPropagation();
-
-    const url = attachment.url;
-
-    // Clear any existing timeout for this attachment
-    if (this.copyTimeouts.has(url)) {
-      clearTimeout(this.copyTimeouts.get(url)!);
-      this.copyTimeouts.delete(url);
-    }
-
-    // Set to loading state
-    this.copyingUrl.set(url);
-    this.copySuccessUrl.set(null);
-    this.copyErrorUrl.set(null);
-
-    // Perform the copy action
-    const success = await this.attachmentActionsService.copyAttachment(
-      attachment,
-      this.message.text,
-    );
-
-    // Set to success or error state
-    this.copyingUrl.set(null);
-    if (success) {
-      this.copySuccessUrl.set(url);
+    const att = this.attUIs()[index];
+    if (att.type === 'img') {
+      this.attachmentViewerService.showImages(this.attUIs(), rect, index);
     } else {
-      this.copyErrorUrl.set(url);
+      this.attachmentViewerService.showDoc(att);
     }
-
-    // Reset to normal state after 3 seconds
-    const timeout = window.setTimeout(() => {
-      this.copySuccessUrl.set(null);
-      this.copyErrorUrl.set(null);
-      this.copyTimeouts.delete(url);
-    }, 2000);
-
-    this.copyTimeouts.set(url, timeout);
-  }
-
-  onDownloadAttachment(attachment: AttachmentInfo, event: MouseEvent) {
-    event.stopPropagation();
-    this.attachmentActionsService.downloadAttachment(attachment);
   }
 
   isDocumentType(attachment: AttachmentInfo) {

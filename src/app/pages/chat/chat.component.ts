@@ -114,11 +114,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    this.messages.set([]);
-    this.files.set([]);
-  }
-
   ngOnInit(): void {
     // Retrieve all messages
     if (this.messages.length == 0) {
@@ -144,6 +139,12 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.messages.update((msgs) => [...msgs, m]);
     });
   }
+
+  ngOnDestroy(): void {
+    this.messages.set([]);
+    this.files.set([]);
+  }
+
 
   private scrollToBottom(onlyWhenNearBottom = true) {
     setTimeout(() => {

@@ -1,7 +1,15 @@
-import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  signal,
+  model,
+  effect,
+} from '@angular/core';
 import { AttachmentInfo, AttachmentUI } from '../../models/attachment';
-import { DOCUMENT_TYPES } from '../../shared/constants';
 import { isPdf, isWord, urlFor } from '../../shared/utils';
+import { AttachmentActionsService } from '../../services/attachment-actions.service.js';
 
 @Component({
   selector: 'app-attachment',
@@ -10,41 +18,94 @@ import { isPdf, isWord, urlFor } from '../../shared/utils';
   styleUrl: './attachment.css',
 })
 export class AttachmentComponent {
-  @Input() attachmentUI!: AttachmentUI;
+  attachmentUI = model.required<AttachmentUI>();
+
   @Input() index!: number;
   @Input() totalCount!: number;
-  @Input() isDocumentType!: boolean;
-  @Input() copyingUrl!: string | null;
-  @Input() copySuccessUrl!: string | null;
-  @Input() copyErrorUrl!: string | null;
 
   @Output() attachmentClick = new EventEmitter<MouseEvent>();
   @Output() copyClick = new EventEmitter<AttachmentInfo>();
   @Output() downloadClick = new EventEmitter<AttachmentInfo>();
-  @Output() imageLoad = new EventEmitter<string>();
+
+  private copyTimeouts = new Map<string, number>();
+  copyingUrl = signal<string | null>(null);
+  copySuccessUrl = signal<string | null>(null);
+  copyErrorUrl = signal<string | null>(null);
 
   urlFor = (att: AttachmentInfo) => urlFor(att.type, att.url);
 
-  onImageLoad(url: string) {
-    this.imageLoad.emit(url);
+  constructor(private attachmentActionsService: AttachmentActionsService) {
+    effect(() => {
+      const copyResult = this.attachmentUI().copied;
+      console.log(`Effect triggered - copied: ${copyResult}`);
+      if (copyResult != undefined) {
+        this.updateCopyIcon(copyResult);
+      }
+    });
   }
 
-  onAttachmentClick(event: MouseEvent) {
-    this.attachmentClick.emit(event);
+  onImageLoad() {
+    this.attachmentUI.update((att) => ({ ...att, loaded: true }));
   }
 
-  onCopyClick(attachment: AttachmentInfo, event: MouseEvent) {
-    event.stopPropagation();
+  onAttachmentClick(attachment: AttachmentInfo, event: MouseEvent) {
+    const isCopyClick = event.ctrlKey || event.metaKey;
+
+    if (isCopyClick) {
+      this.copyAttachment(attachment);
+    } else {
+      this.attachmentClick.emit(event);
+    }
+  }
+
+  async onCopyClick(attachment: AttachmentInfo) {
+    await this.copyAttachment(attachment);
+  }
+
+  async copyAttachment(attachment: AttachmentInfo) {
+    const url = attachment.url;
+
+    // Clear any existing timeout for this attachment
+    if (this.copyTimeouts.has(url)) {
+      clearTimeout(this.copyTimeouts.get(url)!);
+      this.copyTimeouts.delete(url);
+    }
+
+    // Set to loading state
+    this.copyingUrl.set(url);
+    this.copySuccessUrl.set(null);
+    this.copyErrorUrl.set(null);
+
+    // Perform the copy action
     this.copyClick.emit(attachment);
   }
 
-  onDownloadClick(attachment: AttachmentInfo, event: MouseEvent) {
-    event.stopPropagation();
-    this.downloadClick.emit(attachment);
+  updateCopyIcon(success: boolean) {
+    const url = this.attachmentUI().attachment.url;
+
+    this.copyingUrl.set(null);
+    if (success) {
+      this.copySuccessUrl.set(url);
+    } else {
+      this.copyErrorUrl.set(url);
+    }
+
+    // Reset to normal state after 3 seconds
+    const timeout = window.setTimeout(() => {
+      this.copySuccessUrl.set(null);
+      this.copyErrorUrl.set(null);
+      this.copyTimeouts.delete(url);
+    }, 2000);
+
+    this.copyTimeouts.set(url, timeout);
+  }
+
+  onDownloadClick(attachment: AttachmentInfo) {
+    this.attachmentActionsService.downloadAttachment(attachment);
   }
 
   shouldShowMoreOverlay(): boolean {
-    if (this.isDocumentType) {
+    if (this.attachmentUI().type == 'doc') {
       // Show on 4th document (index 3)
       return this.index === 3 && this.totalCount > 3;
     } else {
@@ -54,7 +115,7 @@ export class AttachmentComponent {
   }
 
   getMoreCount(): number {
-    return this.totalCount - (this.isDocumentType ? 3 : 2);
+    return this.totalCount - (this.attachmentUI().type === 'doc' ? 3 : 2);
   }
 
   formatInfo(att: AttachmentInfo) {

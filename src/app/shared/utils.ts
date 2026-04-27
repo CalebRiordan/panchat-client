@@ -3,7 +3,6 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { WEB_SAFE_IMAGE_TYPES, WORD_MIME } from './constants.js';
 import { renderAsync } from 'docx-preview';
 import html2canvas from 'html2canvas';
-import { AttachmentInfo } from '../models/attachment.js';
 
 // Point to the worker on a CDN so your main bundle stays small
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
