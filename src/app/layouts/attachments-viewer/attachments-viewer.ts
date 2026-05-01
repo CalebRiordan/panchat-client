@@ -4,18 +4,17 @@ import {
   ElementRef,
   QueryList,
   signal,
+  untracked,
+  viewChild,
   ViewChild,
   ViewChildren,
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import * as pdfjsLib from 'pdfjs-dist';
 import { AttachmentsViewerService } from '../../services/attachments-viewer.service';
 import { AttachmentUI } from '../../models/attachment';
 import { urlFor } from '../../shared/utils.js';
 import { renderAsync } from 'docx-preview';
 import { WORD_MIME } from '../../shared/constants.js';
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 @Component({
   selector: 'app-attachments-viewer',
@@ -28,12 +27,11 @@ export class AttachmentsViewer {
   imageUIs: AttachmentUI[] = [];
   document: AttachmentUI | undefined = undefined;
   documentContent = signal<{ type: 'pdf' | 'word'; content: HTMLElement } | null>(null);
-  private documentCache = new Map<string, ArrayBuffer>();
 
   @ViewChildren('image') images!: QueryList<ElementRef>;
   @ViewChild('viewer') viewer!: ElementRef;
-  @ViewChild('pdfContainer') pdfContainer!: ElementRef;
-  @ViewChild('wordContainer') wordContainer!: ElementRef;
+  @ViewChild('docContainer') docContainer!: ElementRef;
+  // @ViewChild('wordContainer') wordContainer!: ElementRef;
 
   urlFor = (att: AttachmentUI) => urlFor(att.attachment.type, att.attachment.url);
 
@@ -53,38 +51,38 @@ export class AttachmentsViewer {
           this.transitionImage(avs.targetRect, avs.targetIndex);
         }
 
-        // Set visibility timeout
-        setTimeout(() => {
-          this.visible.set(true);
-        }, 100);
-      } else {
-        this.visible.set(false);
+        this.toggleViewerVisibility();
       }
     });
 
     effect(async () => {
       this.document = this.avs.document();
+      this.toggleViewerVisibility();
 
       if (this.document) {
         this.renderDocument(this.document);
-      } else {
-        this.documentContent.set(null);
       }
     });
 
-    // Handle document DOM injection (Word and PDF)
     effect(() => {
       const docContent = this.documentContent();
-      if (docContent && this.pdfContainer) {
-        const container = this.pdfContainer.nativeElement as HTMLElement;
-        container.innerHTML = '';
-        container.appendChild(docContent.content);
-      } else if (docContent?.type === 'word' && this.wordContainer) {
-        const container = this.wordContainer.nativeElement as HTMLElement;
-        container.innerHTML = '';
-        container.appendChild(docContent.content);
-      }
+
+      if (!docContent) return;
+
+      const el = this.docContainer.nativeElement as HTMLElement;
+      el.innerHTML = '';
+      el.appendChild(docContent.content);
     });
+  }
+
+  private toggleViewerVisibility() {
+    if (this.avs.document() || this.avs.imageUIs()) {
+      setTimeout(() => {
+        this.visible.set(true);
+      }, 100);
+    } else {
+      this.visible.set(false);
+    }
   }
 
   private async waitForImagesRender() {
@@ -155,79 +153,25 @@ export class AttachmentsViewer {
     const { url, type } = doc.attachment;
 
     if (type === 'application/pdf') {
-      // Render all PDF pages to canvas elements—no toolbar, just content
-      const container = await this.renderPdfPages(url);
+      const container = await this.avs.renderPdfPages(url);
+
       this.documentContent.set({
         type: 'pdf',
         content: container,
       });
     } else if (type === WORD_MIME) {
       try {
-        const arrayBuffer = await this.getDocumentArrayBuffer(url);
         // Create a temporary container for rendering
-        const tempContainer = document.createElement('div');
-        await renderAsync(arrayBuffer, tempContainer);
+        const { arrayBuffer, container } = await this.avs.renderWord(url);
+        await renderAsync(arrayBuffer, container);
 
         this.documentContent.set({
           type: 'word',
-          content: tempContainer,
+          content: container,
         });
       } catch (error) {
         console.error('Error rendering Word document:', error);
       }
     }
-  }
-
-  private async getDocumentArrayBuffer(dataUrl: string): Promise<ArrayBuffer> {
-    const cacheKey = dataUrl;
-
-    // Check cache first
-    if (this.documentCache.has(cacheKey)) {
-      return this.documentCache.get(cacheKey)!;
-    }
-
-    // Convert data URL to ArrayBuffer
-    const response = await fetch(dataUrl);
-    const blob = await response.blob();
-    const arrayBuffer = await blob.arrayBuffer();
-
-    // Store in cache for subsequent previews
-    this.documentCache.set(cacheKey, arrayBuffer);
-
-    return arrayBuffer;
-  }
-
-  private async renderPdfPages(dataUrl: string): Promise<HTMLElement> {
-    const container = document.createElement('div');
-    container.className = 'pdf-pages-container';
-
-    const arrayBuffer = await this.getDocumentArrayBuffer(dataUrl);
-    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-    const pdf = await loadingTask.promise;
-
-    // Render all pages
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-      const page = await pdf.getPage(pageNum);
-      const viewport = page.getViewport({ scale: 1.5 });
-
-      const canvas = document.createElement('canvas');
-      canvas.className = 'pdf-page-canvas';
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-
-      const canvasContext = canvas.getContext('2d');
-      if (canvasContext) {
-        await page.render({
-          canvasContext,
-          viewport,
-          canvas,
-        }).promise;
-      }
-
-      container.appendChild(canvas);
-    }
-
-    pdf.destroy();
-    return container;
   }
 }

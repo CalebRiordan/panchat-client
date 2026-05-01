@@ -1,4 +1,4 @@
-@if (avs.imageUIs().length > 0 || document){
+@if (avs.imageUIs().length > 0 || avs.document()){
 <div class="attachments-viewer" [class.viewer-visible]="visible()">
     <div class="close-button" (click)="avs.clear()">X</div>
 
@@ -7,8 +7,10 @@
         <img #image [src]="urlFor(att)" crossorigin="anonymous">
         }
 
-        @if (documentContent()) {
-          <div #pdfContainer class="document-viewer"></div>
+        @if (avs.document()){
+        <div #docContainer class="document-viewer" [class.loading]="!this.documentContent()">
+            <div class="document-loader"></div>
+        </div>
         }
     </div>
 </div>
