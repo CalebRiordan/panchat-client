@@ -57,10 +57,18 @@ export class MessageBox implements OnInit {
   viewAttachment(index: number, event: MouseEvent) {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
     const att = this.attUIs()[index];
+
     if (att.type === 'img') {
-      this.attachmentViewerService.showImages(this.attUIs(), rect, index);
+      // Show images
+      this.attachmentViewerService.showImages(this.imageUIs(), rect, index);
     } else {
-      this.attachmentViewerService.showDoc(att);
+      if (index == 3 && this.docUIs().length > 4) {
+        // Show documents
+        this.attachmentViewerService.showImages(this.docUIs(), rect, index);
+      } else {
+        // Show single document
+        this.attachmentViewerService.openDoc(att);
+      }
     }
   }
 

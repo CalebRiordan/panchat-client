@@ -1,4 +1,4 @@
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { AttachmentUI } from '../models/attachment';
 import * as pdfjsLib from 'pdfjs-dist';
 
@@ -22,7 +22,7 @@ export class AttachmentsViewerService {
     this.targetRect = targetImageRect;
   }
 
-  showDoc(document: AttachmentUI) {
+  openDoc(document: AttachmentUI) {
     this.document.set(document);
   }
 
@@ -36,7 +36,6 @@ export class AttachmentsViewerService {
     container.className = 'pdf-pages-container';
 
     const arrayBuffer = await this.getDocumentArrayBuffer(dataUrl);
-      console.log(arrayBuffer);
 
     const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
     const pdf = await loadingTask.promise;

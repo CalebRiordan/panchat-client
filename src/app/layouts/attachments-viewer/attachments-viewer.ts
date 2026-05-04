@@ -4,21 +4,21 @@ import {
   ElementRef,
   QueryList,
   signal,
-  untracked,
-  viewChild,
   ViewChild,
   ViewChildren,
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AttachmentsViewerService } from '../../services/attachments-viewer.service';
-import { AttachmentUI } from '../../models/attachment';
+import { AttachmentInfo, AttachmentUI } from '../../models/attachment';
 import { urlFor } from '../../shared/utils.js';
 import { renderAsync } from 'docx-preview';
 import { WORD_MIME } from '../../shared/constants.js';
+import { AttachmentComponent } from '../attachment/attachment';
+import { AttachmentActionsService } from '../../services/attachment-actions.service.js';
 
 @Component({
   selector: 'app-attachments-viewer',
-  imports: [],
+  imports: [AttachmentComponent],
   templateUrl: './attachments-viewer.html',
   styleUrl: './attachments-viewer.css',
 })
@@ -27,17 +27,17 @@ export class AttachmentsViewer {
   imageUIs: AttachmentUI[] = [];
   document: AttachmentUI | undefined = undefined;
   documentContent = signal<{ type: 'pdf' | 'word'; content: HTMLElement } | null>(null);
+  message?: string;
 
   @ViewChildren('image') images!: QueryList<ElementRef>;
   @ViewChild('viewer') viewer!: ElementRef;
   @ViewChild('docContainer') docContainer!: ElementRef;
-  // @ViewChild('wordContainer') wordContainer!: ElementRef;
 
   urlFor = (att: AttachmentUI) => urlFor(att.attachment.type, att.attachment.url);
 
   constructor(
     public avs: AttachmentsViewerService,
-    private sanitizer: DomSanitizer,
+    private attachmentActionsService: AttachmentActionsService,
   ) {
     // Make viewer visible 0.3 seconds after initiation
     effect(async () => {
@@ -50,18 +50,17 @@ export class AttachmentsViewer {
           this.scrollToAttachment(avs.targetIndex);
           this.transitionImage(avs.targetRect, avs.targetIndex);
         }
-
-        this.toggleViewerVisibility();
       }
+      this.toggleViewerVisibility();
     });
 
     effect(async () => {
       this.document = this.avs.document();
-      this.toggleViewerVisibility();
 
       if (this.document) {
-        this.renderDocument(this.document);
+        await this.renderDocument(this.document);
       }
+      this.toggleViewerVisibility();
     });
 
     effect(() => {
@@ -76,8 +75,9 @@ export class AttachmentsViewer {
   }
 
   private toggleViewerVisibility() {
-    if (this.avs.document() || this.avs.imageUIs()) {
+    if (this.avs.document() || this.avs.imageUIs().length > 0) {
       setTimeout(() => {
+        console.log('visible');
         this.visible.set(true);
       }, 100);
     } else {
@@ -172,6 +172,32 @@ export class AttachmentsViewer {
       } catch (error) {
         console.error('Error rendering Word document:', error);
       }
+    }
+  }
+
+  async onCopy(att: AttachmentInfo) {
+    const success = await this.attachmentActionsService.copyAttachment(att, this.message);
+
+    this.avs.imageUIs.update((atts) => {
+      return atts.map((a) => (a.attachment.url == att.url ? { ...a, copied: success } : a));
+    });
+
+    if (success) {
+      console.log('Successfully copied image and text');
+    } else {
+      // TODO: Show toast error
+    }
+  }
+
+  async openIfDoc(att: AttachmentUI){
+    if (att.type == "doc"){
+    // TODO: Store attachment viewer state on stack
+
+    // Clear AVS
+    this.avs.clear();
+    
+    // Open document for reading
+    this.avs.openDoc(att);
     }
   }
 }

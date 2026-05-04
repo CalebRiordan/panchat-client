@@ -1,12 +1,4 @@
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  signal,
-  model,
-  effect,
-} from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, model, effect } from '@angular/core';
 import { AttachmentInfo, AttachmentUI } from '../../models/attachment';
 import { isPdf, isWord, urlFor } from '../../shared/utils';
 import { AttachmentActionsService } from '../../services/attachment-actions.service.js';
@@ -20,8 +12,8 @@ import { AttachmentActionsService } from '../../services/attachment-actions.serv
 export class AttachmentComponent {
   attachmentUI = model.required<AttachmentUI>();
 
-  @Input() index!: number;
-  @Input() totalCount!: number;
+  @Input() index?: number;
+  @Input() totalCount?: number;
 
   @Output() attachmentClick = new EventEmitter<MouseEvent>();
   @Output() copyClick = new EventEmitter<AttachmentInfo>();
@@ -62,7 +54,7 @@ export class AttachmentComponent {
     await this.copyAttachment(attachment);
   }
 
-  async copyAttachment(attachment: AttachmentInfo) {
+  private async copyAttachment(attachment: AttachmentInfo) {
     const url = attachment.url;
 
     // Clear any existing timeout for this attachment
@@ -80,7 +72,7 @@ export class AttachmentComponent {
     this.copyClick.emit(attachment);
   }
 
-  updateCopyIcon(success: boolean) {
+  private updateCopyIcon(success: boolean) {
     const url = this.attachmentUI().attachment.url;
 
     this.copyingUrl.set(null);
@@ -105,6 +97,9 @@ export class AttachmentComponent {
   }
 
   shouldShowMoreOverlay(): boolean {
+    // Never show overlay if index isn't set
+    if (!this.index || !this.totalCount) return false;
+
     if (this.attachmentUI().type == 'doc') {
       // Show on 4th document (index 3)
       return this.index === 3 && this.totalCount > 3;
@@ -115,6 +110,13 @@ export class AttachmentComponent {
   }
 
   getMoreCount(): number {
+    if (!this.totalCount) {
+      console.error(
+        'Total count not set for attachment - cannot calculate number of remaining attachments',
+      );
+      return 0;
+    }
+
     return this.totalCount - (this.attachmentUI().type === 'doc' ? 3 : 2);
   }
 

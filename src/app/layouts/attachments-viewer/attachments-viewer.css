@@ -30,6 +30,13 @@
     overflow-y: scroll;
 }
 
+.attachment.document-type {
+    height: 12vw;
+    border: 5px solid var(--colour-background-variant);
+    padding: 1rem 0.7rem;
+    box-sizing: border-box;
+}
+
 .close-button {
     position: absolute;
     top: 2rem;
