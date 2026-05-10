@@ -27,6 +27,7 @@ export class AttachmentsViewer {
   document: AttachmentUI | undefined = undefined;
   documentContent = signal<{ type: 'pdf' | 'word'; content: HTMLElement } | null>(null);
   message?: string;
+  backstack = signal<{ imageUIs: AttachmentUI[] } | undefined>(undefined);
 
   @ViewChildren(AttachmentComponent) attachments!: QueryList<AttachmentComponent>;
   @ViewChild('viewer') viewer!: ElementRef;
@@ -46,15 +47,17 @@ export class AttachmentsViewer {
     effect(async () => {
       this.imageUIs = avs.imageUIs();
 
-      if (this.imageUIs.length > 0) {
+      if (avs.loadNewImages) {
+        avs.loadNewImages = false;
         await this.waitForImagesRender(); // Ensure layout is calculated
 
         if (avs.targetRect) {
           this.scrollToAttachment(avs.targetIndex);
           this.transitionImage(avs.targetRect, avs.targetIndex);
         }
+
+        this.toggleViewerVisibility();
       }
-      this.toggleViewerVisibility();
     });
 
     effect(async () => {
@@ -139,12 +142,12 @@ export class AttachmentsViewer {
   }
 
   private scrollToAttachment(index: number) {
-    const images = this.images;
+    const atts = this.attachments.toArray();
 
-    if (images && images[index]) {
-      const imageEl = images[index].nativeElement as HTMLElement;
+    if (atts && atts[index]) {
+      const attEl = atts[index].host.nativeElement as HTMLElement;
       const viewerEl = this.viewer.nativeElement as HTMLElement;
-      const imageTop = imageEl.offsetTop;
+      const imageTop = attEl.offsetTop;
 
       viewerEl.scrollTo({
         top: imageTop - 55,
@@ -195,12 +198,22 @@ export class AttachmentsViewer {
   }
 
   async openDoc(att: AttachmentUI) {
-    // TODO: Store attachment viewer state on stack
+    //Set backstack
+    this.backstack.set({ imageUIs: this.imageUIs });
 
     // Clear AVS
     this.avs.clear();
 
     // Open document for reading
     this.avs.openDoc(att);
+  }
+
+  async popBackstack() {
+    const backstack = this.backstack();
+    if (backstack?.imageUIs) {
+      this.avs.clear();
+      this.avs.imageUIs.set(backstack.imageUIs);
+      this.backstack.set(undefined);
+    }
   }
 }

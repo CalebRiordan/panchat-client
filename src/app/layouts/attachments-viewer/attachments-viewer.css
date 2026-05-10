@@ -40,6 +40,16 @@ app-attachment {
     transition: opacity 0.4s ease;
 }
 
+.back-button {
+    position: absolute;
+    top: 2rem;
+    left: 3rem;
+    line-height: 0.8;
+    font-size: 5rem;
+    cursor: pointer;
+    color: var(--colour-text);
+}
+
 .close-button {
     position: absolute;
     top: 2rem;

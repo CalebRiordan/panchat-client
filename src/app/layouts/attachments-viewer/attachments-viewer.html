@@ -1,12 +1,14 @@
 @if (avs.imageUIs().length > 0 || avs.document()){
 <div class="attachments-viewer" [class.viewer-visible]="visible()">
+    @if (this.backstack()){
+    <div class="back-button" (click)="popBackstack()"><i class="fa fa-arrow-left" aria-hidden="true"></i></div>
+    }
     <div class="close-button" (click)="avs.clear()">X</div>
 
     <div #viewer class="images-container">
         @for (att of avs.imageUIs(); track "avs_" + att.attachment.url; let i = $index) {
-        <app-attachment [class.doc-type]="att.type == 'doc'"
-            [(attachmentUI)]="avs.imageUIs()[i]" (copyClick)="onCopy($event)"
-            (attachmentClick)="att.type == 'doc' ? openDoc(att) : ''">
+        <app-attachment [class.doc-type]="att.type == 'doc'" [(attachmentUI)]="avs.imageUIs()[i]"
+            (copyClick)="onCopy($event)" (attachmentClick)="att.type == 'doc' ? openDoc(att) : ''">
         </app-attachment>
         }
 

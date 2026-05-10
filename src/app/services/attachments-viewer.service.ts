@@ -8,6 +8,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLi
 export class AttachmentsViewerService {
   document = signal<AttachmentUI | undefined>(undefined);
   imageUIs = signal<AttachmentUI[]>([]);
+  loadNewImages = false;
   targetIndex = 0;
   targetRect?: DOMRect = undefined;
   stuntDouble: any;
@@ -18,6 +19,7 @@ export class AttachmentsViewerService {
 
   showImages(attachments: AttachmentUI[], targetImageRect: DOMRect, targetImageIndex: number) {
     this.imageUIs.set(attachments);
+    this.loadNewImages = true;
     this.targetIndex = targetImageIndex;
     this.targetRect = targetImageRect;
   }
