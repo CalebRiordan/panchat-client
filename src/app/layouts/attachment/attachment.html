@@ -1,13 +1,13 @@
 @let att = attachmentUI().attachment;
 <div class="attachment" [class.loading]="!attachmentUI().loaded" [class.word-icon]="urlFor(att).includes('word-icon')"
-    [class.document-type]="attachmentUI().type == 'doc'">
+    [ngClass]="attachmentUI().type == 'doc' ? 'doc-type' : 'img-type'">
     <!-- Loading icon -->
     @if(!attachmentUI().loaded){
     <span class="attachment-loader"></span>
     }
 
     <!-- Image -->
-    <img [src]="urlFor(att)" [alt]="`Attachment ${index}`" (load)="onImageLoad()"
+    <img #imageEl [src]="urlFor(att)" [alt]="`Attachment ${index}`" (load)="onImageLoad()"
         [style.display]="attachmentUI().loaded ? 'block' : 'none'" crossorigin="anonymous"
         (click)="onAttachmentClick(att, $event)" [class.copying]="copyingUrl() === att.url">
 

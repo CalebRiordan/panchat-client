@@ -47,6 +47,12 @@
     gap: 1rem;
 }
 
+app-attachment {
+    --attachment-height-min: 20vw;
+    --attachment-height-max: 20vw;
+    --attachment-height-doc: 12vw;
+}
+
 .text {
     padding: 0.5rem 1rem;
     inline-size: 100%;

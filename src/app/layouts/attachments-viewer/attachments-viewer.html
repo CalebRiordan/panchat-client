@@ -4,11 +4,10 @@
 
     <div #viewer class="images-container">
         @for (att of avs.imageUIs(); track "avs_" + att.attachment.url; let i = $index) {
-        @if (att.type == "doc"){
-        <app-attachment #image [(attachmentUI)]="avs.imageUIs()[i]" (copyClick)="onCopy($event)"
-            (attachmentClick)="openIfDoc(att)">
+        <app-attachment [class.doc-type]="att.type == 'doc'"
+            [(attachmentUI)]="avs.imageUIs()[i]" (copyClick)="onCopy($event)"
+            (attachmentClick)="att.type == 'doc' ? openDoc(att) : ''">
         </app-attachment>
-        }
         }
 
         @if (avs.document()){

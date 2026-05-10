@@ -2,7 +2,6 @@
     position: relative;
     border: 1px solid var(--colour-background-variant);
     border-radius: 1.4rem;
-    height: 20vw;
     aspect-ratio: 3/4;
     display: flex;
     flex-shrink: 0;
@@ -13,8 +12,13 @@
     cursor: pointer;
 }
 
-.attachment.document-type {
-    height: 12vw;
+.attachment.img-type {
+    min-height: var(--attachment-height-min);
+    max-height: var(--attachment-height-max);
+}
+
+.attachment.doc-type {
+    height: var(--attachment-height-doc);
     border: 5px solid var(--colour-background-variant);
     padding: 1rem 0.7rem;
     box-sizing: border-box;
@@ -24,11 +28,13 @@
     aspect-ratio: 1.055;
 }
 
-.name-banner, .info-banner {
+.name-banner,
+.info-banner {
     display: none;
 }
 
-.document-type .name-banner, .document-type .info-banner{
+.doc-type .name-banner,
+.doc-type .info-banner {
     position: absolute;
     top: 55%;
     left: 0;
@@ -48,7 +54,7 @@
     letter-spacing: -0.4px;
 }
 
-.attachment.document-type .info-banner {
+.attachment.doc-type .info-banner {
     transform: translateY(2rem);
     white-space: pre;
 }
@@ -59,7 +65,7 @@
     object-fit: cover;
 }
 
-.attachment.document-type img {
+.attachment.doc-type img {
     object-fit: contain;
 }
 

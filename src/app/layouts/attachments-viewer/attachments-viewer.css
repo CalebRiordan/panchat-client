@@ -30,11 +30,14 @@
     overflow-y: scroll;
 }
 
-.attachment.document-type {
-    height: 12vw;
-    border: 5px solid var(--colour-background-variant);
-    padding: 1rem 0.7rem;
-    box-sizing: border-box;
+app-attachment {
+    --attachment-height-min: 55vh;
+    --attachment-height-max: 75vh;
+    --attachment-height-doc: 40vh;
+
+    opacity: 0;
+    will-change: transform, opacity;
+    transition: opacity 0.4s ease;
 }
 
 .close-button {
@@ -47,18 +50,7 @@
     color: var(--colour-text);
 }
 
-img {
-    opacity: 0;
-    border-radius: 2rem;
-    width: auto;
-    min-height: 55vh;
-    max-height: 75vh;
-    object-fit: cover;
-    will-change: transform, opacity;
-    transition: opacity 0.4s ease;
-}
-
-.viewer-visible img {
+.viewer-visible app-attachment {
     opacity: 1;
 }
 

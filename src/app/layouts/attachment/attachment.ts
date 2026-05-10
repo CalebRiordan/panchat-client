@@ -1,11 +1,22 @@
-import { Component, Input, Output, EventEmitter, signal, model, effect } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  signal,
+  model,
+  effect,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
 import { AttachmentInfo, AttachmentUI } from '../../models/attachment';
 import { isPdf, isWord, urlFor } from '../../shared/utils';
 import { AttachmentActionsService } from '../../services/attachment-actions.service.js';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-attachment',
-  imports: [],
+  imports: [NgClass],
   templateUrl: './attachment.html',
   styleUrl: './attachment.css',
 })
@@ -19,6 +30,8 @@ export class AttachmentComponent {
   @Output() copyClick = new EventEmitter<AttachmentInfo>();
   @Output() downloadClick = new EventEmitter<AttachmentInfo>();
 
+  @ViewChild('imageEl', { static: true }) imgRef!: ElementRef<HTMLImageElement>;
+
   private copyTimeouts = new Map<string, number>();
   copyingUrl = signal<string | null>(null);
   copySuccessUrl = signal<string | null>(null);
@@ -26,7 +39,10 @@ export class AttachmentComponent {
 
   urlFor = (att: AttachmentInfo) => urlFor(att.type, att.url);
 
-  constructor(private attachmentActionsService: AttachmentActionsService) {
+  constructor(
+    private attachmentActionsService: AttachmentActionsService,
+    public host: ElementRef,
+  ) {
     effect(() => {
       const copyResult = this.attachmentUI().copied;
       console.log(`Effect triggered - copied: ${copyResult}`);

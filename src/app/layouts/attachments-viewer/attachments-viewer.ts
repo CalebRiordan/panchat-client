@@ -7,7 +7,6 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
 import { AttachmentsViewerService } from '../../services/attachments-viewer.service';
 import { AttachmentInfo, AttachmentUI } from '../../models/attachment';
 import { urlFor } from '../../shared/utils.js';
@@ -29,11 +28,15 @@ export class AttachmentsViewer {
   documentContent = signal<{ type: 'pdf' | 'word'; content: HTMLElement } | null>(null);
   message?: string;
 
-  @ViewChildren('image') images!: QueryList<ElementRef>;
+  @ViewChildren(AttachmentComponent) attachments!: QueryList<AttachmentComponent>;
   @ViewChild('viewer') viewer!: ElementRef;
   @ViewChild('docContainer') docContainer!: ElementRef;
 
   urlFor = (att: AttachmentUI) => urlFor(att.attachment.type, att.attachment.url);
+
+  get images(): ElementRef<HTMLImageElement>[] {
+    return this.attachments.map((att) => att.imgRef);
+  }
 
   constructor(
     public avs: AttachmentsViewerService,
@@ -87,9 +90,7 @@ export class AttachmentsViewer {
 
   private async waitForImagesRender() {
     setTimeout(async () => {
-      const imageElements = this.images
-        .toArray()
-        .map((ref) => ref.nativeElement as HTMLImageElement);
+      const imageElements = this.images.map((ref) => ref.nativeElement as HTMLImageElement);
 
       const loadPromises = imageElements.map((img) => {
         if (img.complete) return Promise.resolve(); // Already cached/loaded
@@ -112,29 +113,33 @@ export class AttachmentsViewer {
    * @param {number} index The index of the image in the list of images to be displayed in the attachments viewer
    */
   private transitionImage(targetRectOrigin: DOMRect, index: number) {
-    const finalEl = this.images.toArray()[index].nativeElement as HTMLElement;
-    const finalElRect = finalEl.getBoundingClientRect();
+    // Make attachment visible throughout transition
+    const attachmentComp = this.attachments.toArray()[index];
+    const attachmentEl = attachmentComp.host.nativeElement;
+    attachmentEl.style.opacity = '1';
 
-    const deltaX = targetRectOrigin.left - finalElRect.left;
-    const deltaY = targetRectOrigin.top - finalElRect.top;
-    const scaleW = targetRectOrigin.width / finalElRect.width;
-    const scaleH = targetRectOrigin.height / finalElRect.height;
+    // const finalEl = this.images[index].nativeElement as HTMLElement;
+    const ElRect = attachmentEl.getBoundingClientRect();
 
-    finalEl.style.transition = 'none';
-    finalEl.style.transformOrigin = 'top left';
-    finalEl.style.opacity = '1';
-    finalEl.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scaleW}, ${scaleH})`;
+    const deltaX = targetRectOrigin.left - ElRect.left;
+    const deltaY = targetRectOrigin.top - ElRect.top;
+    const scaleW = targetRectOrigin.width / ElRect.width;
+    const scaleH = targetRectOrigin.height / ElRect.height;
+
+    attachmentEl.style.transition = 'none';
+    attachmentEl.style.transformOrigin = 'top left';
+    attachmentEl.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scaleW}, ${scaleH})`;
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        finalEl.style.transition = 'transform 400ms cubic-bezier(0.2, 0.9, 0.3, 1)';
-        finalEl.style.transform = 'none';
+        attachmentEl.style.transition = 'transform 400ms cubic-bezier(0.2, 0.9, 0.3, 1)';
+        attachmentEl.style.transform = 'none';
       });
     });
   }
 
   private scrollToAttachment(index: number) {
-    const images = this.images.toArray();
+    const images = this.images;
 
     if (images && images[index]) {
       const imageEl = images[index].nativeElement as HTMLElement;
@@ -189,15 +194,13 @@ export class AttachmentsViewer {
     }
   }
 
-  async openIfDoc(att: AttachmentUI){
-    if (att.type == "doc"){
+  async openDoc(att: AttachmentUI) {
     // TODO: Store attachment viewer state on stack
 
     // Clear AVS
     this.avs.clear();
-    
+
     // Open document for reading
     this.avs.openDoc(att);
-    }
   }
 }
