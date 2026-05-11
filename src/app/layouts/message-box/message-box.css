@@ -58,6 +58,43 @@ app-attachment {
     inline-size: 100%;
     /* Calculation: (3 * 3/4 * image height) + (2 * 1rem gap + 2 * 1rem padding) */
     max-width: calc(47.25vw + 2rem);
+    position: relative;
+}
+
+.copy-feedback {
+    position: absolute;
+    top: -3rem;
+    left: 0;
+    background-color: var(--colour-highlight);
+    color: var(--colour-background);
+    padding: 0.6rem 1rem;
+    border-radius: 0.6rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0.7;
+    animation: fadeInOut 2s ease-in-out forwards;
+    box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateY(-0.5rem);
+    }
+    10% {
+        opacity: 0.7;
+        transform: translateY(0);
+    }
+    90% {
+        opacity: 0.7;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-0.5rem);
+    }
 }
 
 @media (max-width: 1700px) {}

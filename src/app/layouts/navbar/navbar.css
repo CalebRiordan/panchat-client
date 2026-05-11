@@ -1,0 +1,129 @@
+.navbar {
+    width: 100%;
+    background-color: transparent;
+    display: flex;
+    gap: 1.6rem;
+    padding: 1.6rem;
+    box-sizing: border-box;
+    align-items: center;
+}
+
+.nav-right {
+    margin-left: auto;
+    display: flex;
+    gap: 1.6rem;
+    align-items: center;
+}
+
+.nav-left {
+    display: flex;
+    gap: 1.6rem;
+    align-items: center;
+}
+
+.nav-button {
+    width: 4.4rem;
+    height: 4.4rem;
+    padding: 1.4rem;
+    font-size: 1.8rem;
+    background-color: var(--colour-on-background-contrast);
+    border-radius: 2rem;
+    color: var(--colour-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.nav-button:hover {
+    background-color: var(--colour-highlight);
+    cursor: pointer;
+    transform: scale(1.05);
+    box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.2);
+}
+
+/* Shortcuts Guide */
+.shortcuts-guide {
+    position: relative;
+    display: flex;
+    align-items: center;
+    /* Create hover zone that extends downward */
+    padding-bottom: 2rem;
+    margin-bottom: -2rem;
+}
+
+.shortcuts-panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    background-color: var(--colour-on-background);
+    border: 1px solid var(--colour-on-background-contrast);
+    border-radius: 1.5rem;
+    min-width: 28rem;
+    box-shadow: 0 0.8rem 2.4rem rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-2rem);
+    transition: all 0.3s ease;
+    z-index: 50;
+    pointer-events: none;
+}
+
+.shortcuts-guide:hover .shortcuts-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-1rem);
+    pointer-events: auto;
+}
+
+.shortcuts-header {
+    padding: 1.2rem 1.6rem;
+    border-bottom: 1px solid var(--colour-on-background-contrast);
+}
+
+.shortcuts-header h3 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: var(--colour-text);
+    font-weight: 600;
+}
+
+.shortcuts-content {
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.shortcut-item {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1rem 1.6rem;
+    transition: background-color 0.2s ease;
+    cursor: default;
+}
+
+/* .shortcut-item:hover {
+    background-color: var(--colour-background-variant);
+} */
+
+.shortcut-key {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--colour-highlight);
+    font-family: 'Courier New', monospace;
+    min-width: 10rem;
+    padding: 0.4rem 0.8rem;
+    background-color: var(--colour-background-variant);
+    border-radius: 0.6rem;
+    text-align: center;
+    letter-spacing: 0.05em;
+}
+
+.shortcut-desc {
+    font-size: 1.3rem;
+    color: var(--colour-on-background-contrast);
+    flex: 1;
+}

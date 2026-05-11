@@ -132,6 +132,11 @@
     opacity: 1;
 }
 
+.attachment .attachment-actions:has(.copy-loader, .fa-check, .fa-xmark) {
+    opacity: 1;
+}
+
+
 .image-action-btn {
     display: flex;
     align-items: center;

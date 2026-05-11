@@ -7,6 +7,8 @@ import {
   signal,
   untracked,
   ViewChild,
+  ViewChildren,
+  QueryList,
 } from '@angular/core';
 import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
@@ -27,7 +29,7 @@ import { AttachmentsViewer } from '../../layouts/attachments-viewer/attachments-
 import { ClipboardService } from '../../services/clipboard.service.js';
 import { AttachmentActionsService } from '../../services/attachment-actions.service';
 import { ALLOWED_TYPES, DOCUMENT_TYPES } from '../../shared/constants.js';
-import { AttachmentInfo } from '../../models/attachment.js';
+import { Navbar } from '../../layouts/navbar/navbar';
 
 interface FilePreview {
   id: number;
@@ -39,7 +41,7 @@ interface FilePreview {
 
 @Component({
   selector: 'app-chat',
-  imports: [MessageBox, AttachmentsViewer],
+  imports: [MessageBox, AttachmentsViewer, Navbar],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
 })
@@ -62,13 +64,12 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   @ViewChild('messageInput') private messageInput!: ElementRef;
+  @ViewChildren(MessageBox) messageBoxes!: QueryList<MessageBox>;
 
   constructor(
     private messageService: MessageService,
     private toast: ToastService,
-    private authService: AuthService,
     private clipbardService: ClipboardService,
-    private attachmentActionsService: AttachmentActionsService,
   ) {
     // Effect for messages
     effect(() => {
@@ -85,12 +86,10 @@ export class ChatComponent implements OnInit, OnDestroy {
       if (trigger === 0) return;
 
       untracked(async () => {
-        const lastMessage = this.messages().at(-1);
-        const att = lastMessage?.attachments[0];
-
-        // Check if last message has file to copy
-        if (att) {
-          await this.attachmentActionsService.copyAttachment(att, lastMessage.text);
+        // Get the last message-box component and call its copyMessage method
+        const lastMessageBox = this.messageBoxes?.last;
+        if (lastMessageBox) {
+          await lastMessageBox.copy();
         }
       });
     });
@@ -322,7 +321,4 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.files.set([]);
   }
 
-  onLogout() {
-    this.authService.logout();
-  }
 }

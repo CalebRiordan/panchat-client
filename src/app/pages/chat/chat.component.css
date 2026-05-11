@@ -1,33 +1,3 @@
-.navbar {
-    width: 100%;
-    background-color: transparent;
-    display: flex;
-    gap: 1.6rem;
-    padding: 1.6rem;
-    box-sizing: border-box;
-}
-
-.nav-right {
-    margin-left: auto;
-}
-
-.nav-left {
-    margin-right: auto;
-}
-
-.nav-button {
-    padding: 1.4rem;
-    font-size: 1.8rem;
-    background-color: var(--colour-on-background-contrast);
-    border-radius: 2rem;
-    color: var(--colour-text);
-}
-
-.nav-button:hover {
-    background-color: var(--colour-highlight);
-    cursor: pointer;
-}
-
 .chat-container {
     width: 100%;
     height: calc(100% - 8rem);

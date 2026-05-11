@@ -26,7 +26,6 @@ export class AttachmentActionsService {
           getBlobFn = async () => convertToPngBlob(attachment.url);
           break;
         default:
-          this.toastService.show('Copy is only supported for PNG and JPEG images', 'error');
           return false;
       }
 

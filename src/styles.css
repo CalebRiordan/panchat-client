@@ -24,7 +24,17 @@ html.dark-mode {
 }
 
 html.light-mode {
-    /* Add light mode */
+    --colour-background: #f0f5f4;
+    /* very light teal-white, like #f6f3e7 but cooler  */
+    --colour-text: #f1fbf7;
+    /* dark forest green — strong contrast, on-palette  */
+    --colour-highlight: #95c6c1;
+    /* soft blue-teal for surfaces/inputs               */
+    --colour-on-background: #50ab9a;
+    /* vibrant teal replaces shamrock as highlight      */
+    --colour-on-background-contrast: #93f5e1;
+    /* same teal, used for borders/accents              */
+    --colour-background-variant: #315b51;
 }
 
 /* Tooltip styling */

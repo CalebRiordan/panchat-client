@@ -9,14 +9,14 @@
         <!-- Images -->
         @for (imgUI of imageUIs().slice(0, 3); track imgUI.attachment.url; let i = $index){
         <app-attachment [(attachmentUI)]="attUIs()[imgUI.index]" [index]="i" [totalCount]="imageUIs().length"
-            (copyClick)="onCopy($event)" (attachmentClick)="viewAttachment(imgUI.index, $event)">
+            (copyClick)="copyAttachment($event)" (attachmentClick)="viewAttachment(imgUI.index, $event)">
         </app-attachment>
         }
 
         <!-- Documents -->
         @for (docUI of docUIs().slice(0, 4); track docUI.attachment.url; let i = $index){
         <app-attachment [(attachmentUI)]="attUIs()[docUI.index]" [index]="i" [totalCount]="docUIs().length"
-            (copyClick)="onCopy($event)" (attachmentClick)="viewAttachment(docUI.index, $event)">
+            (copyClick)="copyAttachment($event)" (attachmentClick)="viewAttachment(docUI.index, $event)">
         </app-attachment>
         }
     </div>
@@ -25,6 +25,9 @@
     @if (message.text){
     <div class="text">
         {{message.text }}
+        @if (copyFeedback().show) {
+        <div class="copy-feedback">{{copyFeedback().message}}</div>
+        }
     </div>
     }
 </div>
