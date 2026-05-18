@@ -9,11 +9,16 @@
     padding: 1rem;
     margin-top: 3rem;
     background-color: var(--colour-on-background-contrast);
-    border-radius: 0 1rem 1rem 1rem;
+    border-radius: 0.8rem 1rem 1rem 0.2rem;
     font-size: 1.8rem;
     color: var(--colour-text);
-    border: none;
-    box-shadow: 2px 2px 4px var(--colour-background-variant);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+}
+
+.message-box:hover {
+    box-shadow: var(--shadow-lg);
 }
 
 .message-box.has-attachments {
@@ -23,7 +28,7 @@
 .message-box.local-message {
     align-self: flex-end;
     background-color: var(--colour-on-background);
-    border-radius: 1rem 0 1rem 1rem;
+    border-radius: 1rem 0.2rem 1rem 1rem;
 }
 
 .message-box.same-device {

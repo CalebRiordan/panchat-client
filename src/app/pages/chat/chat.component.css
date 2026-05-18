@@ -96,8 +96,9 @@
     padding: 1rem;
     background-color: var(--colour-on-background);
     box-sizing: border-box;
-    border: 0.2px solid var(--colour-on-background-contrast);
-    border-radius: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.2rem;
+    box-shadow: var(--shadow-lg);
 }
 
 .btn-remove-previews {
@@ -116,6 +117,15 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-remove-previews:hover {
+    opacity: 1;
+    box-shadow: var(--shadow-md);
+    transform: scale(1.08);
 }
 
 .files-content {

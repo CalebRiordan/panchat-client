@@ -1,7 +1,7 @@
 main {
     width: 100vw;
     height: 100vh;
-    background-color: var(--colour-background-variant);
+    background: linear-gradient(135deg, var(--colour-background-variant) 0%, var(--colour-background) 100%);
     padding: 1rem;
 }
 
@@ -9,7 +9,10 @@ main {
     background-color: var(--colour-background);
     box-sizing: content-box;
     overflow: hidden;
-    border-radius: 0.8rem;
+    border-radius: 1.2rem;
     width: 100%;
     height: 100%;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: box-shadow var(--transition-base);
 }

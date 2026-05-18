@@ -27,21 +27,23 @@
     padding: 1.4rem;
     font-size: 1.8rem;
     background-color: var(--colour-on-background-contrast);
-    border-radius: 2rem;
+    border-radius: 1.2rem;
     color: var(--colour-text);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
+    transition: all var(--transition-base);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 .nav-button:hover {
     background-color: var(--colour-highlight);
     cursor: pointer;
-    transform: scale(1.05);
-    box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Shortcuts Guide */
@@ -59,14 +61,14 @@
     top: calc(100% + 0.5rem);
     left: 0;
     background-color: var(--colour-on-background);
-    border: 1px solid var(--colour-on-background-contrast);
-    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
     min-width: 28rem;
-    box-shadow: 0 0.8rem 2.4rem rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-lg);
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-2rem);
-    transition: all 0.3s ease;
+    transform: translateY(-0.5rem);
+    transition: all var(--transition-base);
     z-index: 50;
     pointer-events: none;
 }
@@ -74,13 +76,13 @@
 .shortcuts-guide:hover .shortcuts-panel {
     opacity: 1;
     visibility: visible;
-    transform: translateY(-1rem);
+    transform: translateY(0rem);
     pointer-events: auto;
 }
 
 .shortcuts-header {
     padding: 1.2rem 1.6rem;
-    border-bottom: 1px solid var(--colour-on-background-contrast);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .shortcuts-header h3 {
@@ -88,6 +90,7 @@
     font-size: 1.6rem;
     color: var(--colour-text);
     font-weight: 600;
+    letter-spacing: 0.3px;
 }
 
 .shortcuts-content {
@@ -100,14 +103,14 @@
     display: flex;
     align-items: center;
     gap: 1.2rem;
-    padding: 1rem 1.6rem;
-    transition: background-color 0.2s ease;
+    padding: 0.9rem 1.6rem;
+    transition: background-color var(--transition-fast);
     cursor: default;
 }
 
-/* .shortcut-item:hover {
-    background-color: var(--colour-background-variant);
-} */
+.shortcut-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
 
 .shortcut-key {
     font-size: 1.2rem;
@@ -116,10 +119,11 @@
     font-family: 'Courier New', monospace;
     min-width: 10rem;
     padding: 0.4rem 0.8rem;
-    background-color: var(--colour-background-variant);
-    border-radius: 0.6rem;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 0.5rem;
     text-align: center;
     letter-spacing: 0.05em;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .shortcut-desc {
