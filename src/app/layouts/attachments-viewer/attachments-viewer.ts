@@ -14,6 +14,7 @@ import { renderAsync } from 'docx-preview';
 import { WORD_MIME } from '../../shared/constants.js';
 import { AttachmentComponent } from '../attachment/attachment';
 import { AttachmentActionsService } from '../../services/attachment-actions.service.js';
+import { ToastService } from '../../services/toast.service.js';
 
 @Component({
   selector: 'app-attachments-viewer',
@@ -42,6 +43,7 @@ export class AttachmentsViewer {
   constructor(
     public avs: AttachmentsViewerService,
     private attachmentActionsService: AttachmentActionsService,
+    private toastService: ToastService,
   ) {
     // Make viewer visible 0.3 seconds after initiation
     effect(async () => {
@@ -83,7 +85,6 @@ export class AttachmentsViewer {
   private toggleViewerVisibility() {
     if (this.avs.document() || this.avs.imageUIs().length > 0) {
       setTimeout(() => {
-        console.log('visible');
         this.visible.set(true);
       }, 100);
     } else {
@@ -193,7 +194,7 @@ export class AttachmentsViewer {
     if (success) {
       console.log('Successfully copied image and text');
     } else {
-      // TODO: Show toast error
+      this.toastService.show('An error occurred when trying to copy image/text', 'error');
     }
   }
 

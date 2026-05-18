@@ -45,7 +45,6 @@ export class AttachmentComponent {
   ) {
     effect(() => {
       const copyResult = this.attachmentUI().copied;
-      console.log(`Effect triggered - copied: ${copyResult}`);
       if (copyResult != undefined) {
         this.updateCopyIcon(copyResult);
       }

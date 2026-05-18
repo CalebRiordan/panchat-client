@@ -29,7 +29,6 @@ export class ClipboardService {
 
     if (textItem) {
       textItem.getAsString((text) => {
-        console.log(`getAsString text: ${text}`);
         this.pastedText = text;
         this.pasteCommand.update((v) => v + 1);
       });

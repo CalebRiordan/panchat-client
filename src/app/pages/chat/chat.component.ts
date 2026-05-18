@@ -9,6 +9,7 @@ import {
   ViewChild,
   ViewChildren,
   QueryList,
+  HostListener,
 } from '@angular/core';
 import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
@@ -24,10 +25,8 @@ import {
 } from '../../shared/utils';
 import { isHeic } from 'heic-to';
 import { MessageBox } from '../../layouts/message-box/message-box';
-import { AuthService } from '../../services/auth';
 import { AttachmentsViewer } from '../../layouts/attachments-viewer/attachments-viewer';
 import { ClipboardService } from '../../services/clipboard.service.js';
-import { AttachmentActionsService } from '../../services/attachment-actions.service';
 import { ALLOWED_TYPES, DOCUMENT_TYPES } from '../../shared/constants.js';
 import { Navbar } from '../../layouts/navbar/navbar';
 
@@ -66,10 +65,67 @@ export class ChatComponent implements OnInit, OnDestroy {
   @ViewChild('messageInput') private messageInput!: ElementRef;
   @ViewChildren(MessageBox) messageBoxes!: QueryList<MessageBox>;
 
+  @HostListener('window:paste', ['$event'])
+  onPaste(event: ClipboardEvent) {
+    console.log("Paste text");
+    
+    if (event.clipboardData) this.clipboardService.paste(event.clipboardData);
+    event.preventDefault();
+  }
+
+  @HostListener('window:copy', ['$event'])
+  onCopy(event: ClipboardEvent) {
+    const target = event.target as HTMLElement;
+    this.clipboardService.copy();
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      return; // Browser handles standard text copying
+    }
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    // If user is already in an input or textarea, don't process this logic
+    const activeElement = document.activeElement;
+    if (activeElement?.tagName === 'TEXTAREA' || activeElement?.tagName === 'INPUT') {
+      return;
+    }
+
+    // Don't interfere with system keyboard shortcuts (Ctrl+C, Ctrl+V, Ctrl+A)
+    if (event.ctrlKey) {
+      if (['a', 'c', 'v'].includes(event.key.toLowerCase())) {
+        return; // These are handled by browser/other handlers
+      }
+      return; // Skip other Ctrl combinations
+    }
+
+    // Don't interfere with Alt and Meta key combinations
+    if (event.altKey || event.metaKey) {
+      return;
+    }
+
+    // Ignore standalone modifier keys
+    const modifierKeys = ['Control', 'Shift', 'Alt', 'Meta'];
+    if (modifierKeys.includes(event.key)) {
+      return;
+    }
+
+    // Ignore special keys that shouldn't trigger focus
+    const specialKeys = ['Tab', 'Escape', 'F5', 'F12'];
+    if (specialKeys.includes(event.key) || event.key.startsWith('F')) {
+      return;
+    }
+
+    // Focus the message input textarea so the character gets typed there
+    const messageInput = document.querySelector('textarea.content') as HTMLTextAreaElement;
+    if (messageInput) {
+      messageInput.focus();
+    }
+  }
+
   constructor(
     private messageService: MessageService,
     private toast: ToastService,
-    private clipbardService: ClipboardService,
+    private clipboardService: ClipboardService,
   ) {
     // Effect for messages
     effect(() => {
@@ -82,7 +138,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     // Effect for copyCommand
     effect(async () => {
-      const trigger = this.clipbardService.copyCommand();
+      const trigger = this.clipboardService.copyCommand();
       if (trigger === 0) return;
 
       untracked(async () => {
@@ -96,12 +152,12 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     // Effect for pasteCommand
     effect(async () => {
-      const trigger = this.clipbardService.pasteCommand();
+      const trigger = this.clipboardService.pasteCommand();
       if (trigger === 0) return;
 
       untracked(async () => {
-        const files = this.clipbardService.pastedFiles;
-        const text = this.clipbardService.pastedText;
+        const files = this.clipboardService.pastedFiles;
+        const text = this.clipboardService.pastedText;
 
         if (text) {
           setTimeout(() => {
@@ -304,7 +360,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     // Replace existing file previews with new ones with URLs
     this.filesReady.set(true);
     this.files.set([...preexisting, ...previewsWithUrls]);
-    console.log(`${this.files().length} files selected`);
   }
 
   onImageLoad(id: number) {
