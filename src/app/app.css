@@ -16,3 +16,26 @@ main {
     border: 1px solid rgba(255, 255, 255, 0.08);
     transition: box-shadow var(--transition-base);
 }
+
+@media (max-width: 768px) {
+    main {
+        padding: 0.5rem;
+    }
+
+    #content-area {
+        border-radius: 0.8rem;
+        box-shadow: var(--shadow-md);
+    }
+}
+
+@media (max-width: 480px) {
+    main {
+        padding: 0.25rem;
+    }
+
+    #content-area {
+        border-radius: 0.4rem;
+        border: none;
+        box-shadow: var(--shadow-sm);
+    }
+}

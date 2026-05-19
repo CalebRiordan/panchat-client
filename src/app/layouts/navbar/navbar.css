@@ -131,3 +131,113 @@
     color: var(--colour-on-background-contrast);
     flex: 1;
 }
+
+/* Tablet & Mobile Responsive */
+@media (max-width: 1200px) {
+    .navbar {
+        gap: 1rem;
+        padding: 1.2rem;
+    }
+
+    .nav-button {
+        width: 4rem;
+        height: 4rem;
+        padding: 1.2rem;
+        font-size: 1.6rem;
+    }
+
+    .nav-left,
+    .nav-right {
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        gap: 1rem;
+        padding: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .nav-button {
+        width: 4rem;
+        height: 4rem;
+        padding: 1.2rem;
+        font-size: 1.6rem;
+    }
+
+    .nav-left,
+    .nav-right {
+        gap: 1rem;
+    }
+
+    .shortcuts-panel {
+        min-width: 24rem;
+        right: 0;
+        left: auto;
+    }
+
+    .shortcut-item {
+        gap: 1rem;
+        padding: 0.8rem 1.2rem;
+    }
+
+    .shortcut-key {
+        font-size: 1.2rem;
+        min-width: 10rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .shortcut-desc {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar {
+        gap: 0.8rem;
+        padding: 0.8rem;
+        justify-content: space-between;
+    }
+
+    .nav-button {
+        width: 3.8rem;
+        height: 3.8rem;
+        padding: 1rem;
+        font-size: 1.4rem;
+    }
+
+    .nav-left,
+    .nav-right {
+        gap: 0.8rem;
+    }
+
+    .shortcuts-guide {
+        padding-bottom: 1.2rem;
+        margin-bottom: -1.2rem;
+    }
+
+    .shortcuts-panel {
+        min-width: 18rem;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .shortcut-item {
+        flex-direction: row;
+        gap: 0.8rem;
+        padding: 0.7rem 1rem;
+        align-items: center;
+    }
+
+    .shortcut-key {
+        width: auto;
+        font-size: 1rem;
+        min-width: 8rem;
+        padding: 0.3rem 0.6rem;
+    }
+
+    .shortcut-desc {
+        font-size: 1.2rem;
+    }
+}

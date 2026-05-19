@@ -102,8 +102,113 @@ app-attachment {
     }
 }
 
-@media (max-width: 1700px) {}
+@media (max-width: 1700px) {
+    app-attachment {
+        --attachment-height-min: 18vw;
+        --attachment-height-max: 18vw;
+        --attachment-height-doc: 10vw;
+    }
 
-@media (max-width: 1200px) {}
+    .text {
+        max-width: calc(45vw + 2rem);
+    }
+}
 
-@media (max-width: 768px) {}
+@media (max-width: 1200px) {
+    app-attachment {
+        --attachment-height-min: 16vw;
+        --attachment-height-max: 16vw;
+        --attachment-height-doc: 9vw;
+    }
+
+    .message-box {
+        font-size: 1.6rem;
+        padding: 0.8rem;
+        margin-top: 2rem;
+    }
+
+    .text {
+        font-size: 1.6rem;
+        max-width: calc(42vw + 1.5rem);
+        padding: 0.4rem 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .message-box {
+        font-size: 1.5rem;
+        padding: 0.8rem;
+        margin-top: 1.5rem;
+        border-radius: 0.7rem 0.9rem 0.9rem 0.15rem;
+    }
+
+    .message-box.local-message {
+        border-radius: 0.9rem 0.15rem 0.9rem 0.9rem;
+    }
+
+    .message-box.same-device {
+        margin-top: 0.6rem;
+    }
+
+    app-attachment {
+        --attachment-height-min: 24vw;
+        --attachment-height-max: 24vw;
+        --attachment-height-doc: 16vw;
+    }
+
+    .text {
+        font-size: 1.5rem;
+        max-width: 85vw;
+        padding: 0.5rem 0.8rem;
+        inline-size: 100%;
+    }
+
+    .copy-feedback {
+        font-size: 1.1rem;
+        padding: 0.6rem 0.9rem;
+        top: -2.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .message-box {
+        font-size: 1.3rem;
+        padding: 0.7rem;
+        margin-top: 1.2rem;
+        border-radius: 0.6rem 0.8rem 0.8rem 0.12rem;
+        grid-template-columns: auto;
+    }
+
+    .message-box.local-message {
+        border-radius: 0.8rem 0.12rem 0.8rem 0.8rem;
+    }
+
+    .message-box.same-device {
+        margin-top: 0.5rem;
+    }
+
+    app-attachment {
+        --attachment-height-min: 28vw;
+        --attachment-height-max: 28vw;
+        --attachment-height-doc: 20vw;
+    }
+
+    .attachments-container {
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .text {
+        font-size: 1.3rem;
+        max-width: 92vw;
+        padding: 0.4rem 0.7rem;
+        inline-size: 100%;
+    }
+
+    .copy-feedback {
+        font-size: 1rem;
+        padding: 0.5rem 0.8rem;
+        top: -2.3rem;
+        left: 0;
+    }
+}

@@ -226,7 +226,6 @@
     top: -1px;
     left: 12%;
     background-color: var(--colour-background);
-    /* border: 1px solid var(--colour-background-variant); */
     border-left: none;
     opacity: 0.9;
     border-bottom-left-radius: 0.5rem;
@@ -305,7 +304,6 @@
 }
 
 .btn-send-message {
-    min-width: 6rem;
     max-width: 6rem;
     height: 6rem;
     background-color: var(--colour-highlight);
@@ -338,16 +336,176 @@
     .messages-container {
         width: 82%;
     }
+
+    .create-message-controls {
+        width: 82%;
+    }
 }
 
 @media (max-width: 1200px) {
     .messages-container {
         width: 85%;
+        padding: 1.5rem;
+    }
+
+    .create-message-controls {
+        width: 85%;
+    }
+
+    .text-box {
+        min-height: 4.5rem;
+        gap: 2rem;
+    }
+
+    .text-box .content {
+        font-size: 1.8rem;
     }
 }
 
 @media (max-width: 768px) {
+    .chat-container {
+        height: calc(100% - 7rem);
+        padding: 1.5rem 1rem;
+        gap: 0.5rem;
+    }
+
     .messages-container {
-        width: 90%;
+        width: 95%;
+        padding: 1.5rem 1.2rem;
+        gap: 1rem;
+    }
+
+    .create-message-controls {
+        width: 95%;
+        gap: 1rem;
+        bottom: 0;
+    }
+
+    .text-box {
+        padding: 1.2rem 1.5rem;
+        gap: 1.5rem;
+        border-radius: 1.5rem;
+    }
+
+    .text-box .content {
+        font-size: 1.8rem;
+        padding: 0 0.3rem;
+    }
+
+    .files-container {
+        height: 16rem;
+        width: calc(100% - 4.5rem - 1rem);
+        bottom: calc(100% + 1rem);
+        padding: 1rem;
+    }
+
+    .file-preview {
+        border-radius: 1.5rem;
+    }
+
+    .btn-remove-previews {
+        width: 2.4rem;
+        height: 2.4rem;
+        font-size: 1.8rem;
+        margin: 0.8rem;
+    }
+
+    .loading-text {
+        font-size: 2.8rem;
+    }
+
+    .dot-pulse::after {
+        font-size: 2.8rem;
+    }
+
+    .retrieval-failed-text {
+        margin-top: 4rem;
+        font-size: 2.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-container {
+        height: calc(100% - 6rem);
+        padding: 1rem 0.8rem;
+        gap: 0.3rem;
+    }
+
+    .messages-container {
+        width: 100%;
+        padding: 1rem;
+        gap: 0.8rem;
+    }
+
+    .create-message-controls {
+        width: 100%;
+        gap: 0.8rem;
+    }
+
+    .text-box {
+        padding: 1rem 1.2rem;
+        gap: 1rem;
+        border-radius: 1.2rem;
+        flex-wrap: wrap;
+    }
+
+    .text-box .content {
+        font-size: 1.6rem;
+        padding: 0;
+    }
+
+    .text-box span {
+        font-size: 1.6rem;
+    }
+
+    .files-container {
+        height: 14rem;
+        width: calc(100% - 3.5rem - 0.8rem);
+        bottom: calc(100% + 0.8rem);
+        padding: 0.8rem;
+        border-radius: 1rem;
+    }
+
+    .file-preview {
+        border-radius: 1.2rem;
+        aspect-ratio: 3/4;
+    }
+
+    .btn-remove-previews {
+        width: 2.2rem;
+        height: 2.2rem;
+        font-size: 1.6rem;
+        margin: 0.6rem;
+    }
+
+    .btn-remove-preview {
+        width: 2.2rem;
+        height: 2.2rem;
+        font-size: 1.6rem;
+        margin: 0.6rem;
+    }
+
+    .preview-name-strip {
+        font-size: 1.3rem;
+        top: 62%;
+    }
+
+    .sending-message-loader {
+        width: 2rem;
+        height: 2rem;
+        border-width: 3px;
+    }
+
+    .loading-text {
+        font-size: 2.4rem;
+    }
+
+    .dot-pulse::after {
+        font-size: 2.4rem;
+    }
+
+    .retrieval-failed-text {
+        margin-top: 3rem;
+        font-size: 2rem;
     }
 }

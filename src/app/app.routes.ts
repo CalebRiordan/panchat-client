@@ -7,11 +7,11 @@ export const routes: Routes = [
     {
         path: 'session',
         component: SessionComponent,
-        canActivate: [guestGuard]
+        // canActivate: [guestGuard]
     },
     {
         path: '',
         component: ChatComponent,
-        canActivate: [authGuard]
+        // canActivate: [authGuard]
     }
 ];

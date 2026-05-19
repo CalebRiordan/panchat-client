@@ -171,18 +171,29 @@ html.light-mode {
 }
 
 
-@media (max-width: 1200px) {
-    :root {
-        font-size: 50%;
+@media (max-width: 768px) {
+    main {
+        padding: 0.3rem;
+    }
+
+    #content-area {
+        border-radius: 0.8rem;
+        box-shadow: var(--shadow-md);
     }
 }
 
-@media (max-width: 768px) {
-    .messages-container {
-        width: 31.25%;
+@media (max-width: 480px) {
+    :root {
+        font-size: 56.25%;
     }
 
-    :root {
-        font-size: 37.5%;
+    main {
+        padding: 0.2rem;
+        width: 100vw;
+        height: 100vh;
+    }
+
+    #content-area {
+        border-radius: 0.4rem;
     }
 }
