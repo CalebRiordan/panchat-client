@@ -12,7 +12,7 @@ import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
 import { finalize } from 'rxjs';
-import { convertToPngBlob, getUrlFromHeic, getUrlFromPdf } from '../../shared/utils';
+import { getUrlFromHeic, getUrlFromPdf } from '../../shared/utils';
 import { isHeic } from 'heic-to';
 import { MessageBox } from '../../layouts/message-box/message-box';
 import { AuthService } from '../../services/auth';
