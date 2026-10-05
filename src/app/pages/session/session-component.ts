@@ -17,6 +17,7 @@ export class SessionComponent implements OnInit {
   usernameError = '';
   passwordError = '';
   awaitingResult = false;
+  showPassword = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -80,6 +81,10 @@ export class SessionComponent implements OnInit {
         this.passwordError = errors[field];
       }
     });
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   formControl(controlName: string): string {

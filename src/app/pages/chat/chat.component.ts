@@ -7,18 +7,28 @@ import {
   signal,
   untracked,
   ViewChild,
+  ViewChildren,
+  QueryList,
+  HostListener,
 } from '@angular/core';
 import { Message } from '../../models/message';
 import { MessageService } from '../../services/message.service';
 import { ToastService } from '../../services/toast.service';
 import { finalize } from 'rxjs';
-import { getUrlFromHeic, getUrlFromPdf } from '../../shared/utils';
+import {
+  getUrlFromHeic,
+  getUrlFromPdf,
+  getUrlFromWord,
+  isPdf,
+  isWord,
+  urlFor,
+} from '../../shared/utils';
 import { isHeic } from 'heic-to';
 import { MessageBox } from '../../layouts/message-box/message-box';
-import { AuthService } from '../../services/auth';
 import { AttachmentsViewer } from '../../layouts/attachments-viewer/attachments-viewer';
 import { ClipboardService } from '../../services/clipboard.service.js';
-import { AttachmentActionsService } from '../../services/attachment-actions.service';
+import { ALLOWED_TYPES, DOCUMENT_TYPES } from '../../shared/constants.js';
+import { Navbar } from '../../layouts/navbar/navbar';
 
 interface FilePreview {
   id: number;
@@ -27,16 +37,6 @@ interface FilePreview {
   file: File;
   loaded: Boolean;
 }
-
-export const allowedTypes = [
-  'image/png',
-  'image/jpeg',
-  'image/heic',
-  'image/webp',
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-];
 
 @Component({
   selector: 'app-chat',
@@ -48,7 +48,12 @@ export class ChatComponent implements OnInit, OnDestroy {
   messages = signal<Message[]>([]);
   files = signal<FilePreview[]>([]);
   uploadSize = 0;
-  
+
+  // Shared imports for use in HTML template
+  docTypes = DOCUMENT_TYPES;
+  isDocument = (type: string) => this.docTypes.includes(type);
+  urlFor = (preview: FilePreview) => urlFor(preview.file.type);
+
   // UI state variables
   scrollNewMessageIntoView = false;
   filesReady = signal(false);
@@ -58,13 +63,69 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   @ViewChild('messageInput') private messageInput!: ElementRef;
+  @ViewChildren(MessageBox) messageBoxes!: QueryList<MessageBox>;
+
+  @HostListener('window:paste', ['$event'])
+  onPaste(event: ClipboardEvent) {
+    console.log("Paste text");
+    
+    if (event.clipboardData) this.clipboardService.paste(event.clipboardData);
+    event.preventDefault();
+  }
+
+  @HostListener('window:copy', ['$event'])
+  onCopy(event: ClipboardEvent) {
+    const target = event.target as HTMLElement;
+    this.clipboardService.copy();
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      return; // Browser handles standard text copying
+    }
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    // If user is already in an input or textarea, don't process this logic
+    const activeElement = document.activeElement;
+    if (activeElement?.tagName === 'TEXTAREA' || activeElement?.tagName === 'INPUT') {
+      return;
+    }
+
+    // Don't interfere with system keyboard shortcuts (Ctrl+C, Ctrl+V, Ctrl+A)
+    if (event.ctrlKey) {
+      if (['a', 'c', 'v'].includes(event.key.toLowerCase())) {
+        return; // These are handled by browser/other handlers
+      }
+      return; // Skip other Ctrl combinations
+    }
+
+    // Don't interfere with Alt and Meta key combinations
+    if (event.altKey || event.metaKey) {
+      return;
+    }
+
+    // Ignore standalone modifier keys
+    const modifierKeys = ['Control', 'Shift', 'Alt', 'Meta'];
+    if (modifierKeys.includes(event.key)) {
+      return;
+    }
+
+    // Ignore special keys that shouldn't trigger focus
+    const specialKeys = ['Tab', 'Escape', 'F5', 'F12'];
+    if (specialKeys.includes(event.key) || event.key.startsWith('F')) {
+      return;
+    }
+
+    // Focus the message input textarea so the character gets typed there
+    const messageInput = document.querySelector('textarea.content') as HTMLTextAreaElement;
+    if (messageInput) {
+      messageInput.focus();
+    }
+  }
 
   constructor(
     private messageService: MessageService,
-    private toastService: ToastService,
-    private authService: AuthService,
-    private clipbardService: ClipboardService,
-    private attachmentActionsService: AttachmentActionsService,
+    private toast: ToastService,
+    private clipboardService: ClipboardService,
   ) {
     // Effect for messages
     effect(() => {
@@ -77,29 +138,27 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     // Effect for copyCommand
     effect(async () => {
-      const trigger = this.clipbardService.copyCommand();
+      const trigger = this.clipboardService.copyCommand();
       if (trigger === 0) return;
 
       untracked(async () => {
-        const lastMessage = this.messages().at(-1);
-        const att = lastMessage?.attachments[0];
-
-        // Check if last message has file to copy
-        if (att) {
-          await this.attachmentActionsService.copyAttachment(att, lastMessage.text);
+        // Get the last message-box component and call its copyMessage method
+        const lastMessageBox = this.messageBoxes?.last;
+        if (lastMessageBox) {
+          await lastMessageBox.copy();
         }
       });
     });
 
     // Effect for pasteCommand
     effect(async () => {
-      const trigger = this.clipbardService.pasteCommand();
+      const trigger = this.clipboardService.pasteCommand();
       if (trigger === 0) return;
 
       untracked(async () => {
-        const files = this.clipbardService.pastedFiles;
-        const text = this.clipbardService.pastedText;
-        
+        const files = this.clipboardService.pastedFiles;
+        const text = this.clipboardService.pastedText;
+
         if (text) {
           setTimeout(() => {
             this.messageInput.nativeElement.value = text;
@@ -108,11 +167,6 @@ export class ChatComponent implements OnInit, OnDestroy {
         if (files) await this.createPreviews(files);
       });
     });
-  }
-
-  ngOnDestroy(): void {
-    this.messages.set([]);
-    this.files.set([]);
   }
 
   ngOnInit(): void {
@@ -125,10 +179,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Error occurred while trying to retrieve messages: ' + err.message);
-          this.toastService.show(
-            'An error occurred trying to fetch message for this account',
-            'error',
-          );
+          this.toast.show('An error occurred trying to fetch message for this account', 'error');
           this.initialFetch.set(false);
           this.initialError.set(true);
         },
@@ -143,6 +194,12 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.messages.update((msgs) => [...msgs, m]);
     });
   }
+
+  ngOnDestroy(): void {
+    this.messages.set([]);
+    this.files.set([]);
+  }
+
 
   private scrollToBottom(onlyWhenNearBottom = true) {
     setTimeout(() => {
@@ -203,7 +260,7 @@ export class ChatComponent implements OnInit, OnDestroy {
           },
           error: (err) => {
             console.error(err);
-            this.toastService.show('An error occurred while trying to send your message', 'error');
+            this.toast.show('An error occurred while trying to send your message', 'error');
           },
         });
     }
@@ -247,17 +304,15 @@ export class ChatComponent implements OnInit, OnDestroy {
       }
 
       // Unsupported file type error
-      let invalidIds = [];
-      previews.filter((preview) => {
+      let invalidIds: number[] = [];
+      previews.filter(async (preview) => {
         const type = preview.file.type;
-        const isWordDoc =
-          type === 'application/msword' ||
-          type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-          this.extensionIs('docx', preview) ||
-          this.extensionIs('doc', preview);
-        const isHeic = type === 'image/heic' || this.extensionIs('heic', preview);
 
-        if (allowedTypes.includes(type) || isWordDoc || isHeic) {
+        if (
+          ALLOWED_TYPES.includes(type) ||
+          isWord(type, preview.filename) ||
+          (await isHeic(preview.file))
+        ) {
           return true;
         }
 
@@ -266,10 +321,13 @@ export class ChatComponent implements OnInit, OnDestroy {
       });
 
       if (invalidIds.length == 1) {
-        // alert file ${name} is of unsupported type ${type}
+        const invalidFile = previews.find((p) => p.id === invalidIds[0])!;
+        this.toast.show(
+          `${invalidFile.filename} is of unsupported type '${invalidFile.file.type}'`,
+        );
         return;
       } else if (invalidIds.length > 1) {
-        // alert ${invalidIds.length} files of unsupported formats
+        this.toast.show(`${invalidIds.length} files of unsupported formats`);
         return;
       }
     }
@@ -283,15 +341,16 @@ export class ChatComponent implements OnInit, OnDestroy {
     // ========================================
     const previewsWithUrls = await Promise.all(
       previews.map(async (p) => {
-        const isPdf = p.file.type === 'application/pdf' || this.extensionIs('pdf', p);
-
-        if (await isHeic(p.file)) {
-          p.url = await getUrlFromHeic(p.file);
-        } else if (isPdf) {
-          p.url = await getUrlFromPdf(p.file);
+        const f = p.file;
+        if (await isHeic(f)) {
+          p.url = await getUrlFromHeic(f);
+        } else if (isPdf(f.type, p.filename)) {
+          p.url = await getUrlFromPdf(f);
+        } else if (isWord(f.type, p.filename)) {
+          p.url = await getUrlFromWord(f);
         } else {
           // NOT ASYNC - room for optimization?
-          p.url = URL.createObjectURL(p.file);
+          p.url = URL.createObjectURL(f);
         }
 
         return p;
@@ -301,7 +360,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     // Replace existing file previews with new ones with URLs
     this.filesReady.set(true);
     this.files.set([...preexisting, ...previewsWithUrls]);
-    console.log(`${this.files().length} files selected`);
   }
 
   onImageLoad(id: number) {
@@ -314,11 +372,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.files.update((current) => current.filter((p) => p.id != id));
   }
 
-  private extensionIs(extension: string, preview: FilePreview) {
-    return preview.filename.toLowerCase().endsWith(`.${extension}`);
+  onRemoveAllPreviews() {
+    this.files.set([]);
   }
 
-  onLogout() {
-    this.authService.logout();
-  }
 }

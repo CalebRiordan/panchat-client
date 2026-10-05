@@ -20,7 +20,14 @@
 
         <label for="password">Password</label>
         <div class="input-group">
-            <input type="password" name="password" formControlName="password">
+            <input [type]="showPassword ? 'text' : 'password'" name="password" formControlName="password">
+            <button type="button" class="password-toggle" (click)="togglePasswordVisibility()" tabindex="-1">
+                @if (showPassword) {
+                    <span class="toggle-icon"><i class="fa-solid fa-eye"></i></span>
+                } @else {
+                    <span class="toggle-icon"><i class="fa-regular fa-eye-slash"></i></span>
+                }
+            </button>
 
             @if (passwordError){
             <div class="form-error">

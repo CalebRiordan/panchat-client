@@ -1,23 +1,30 @@
-import { Component, Input, OnInit, signal } from '@angular/core';
+import { Component, computed, Input, OnInit, signal } from '@angular/core';
 import { Message } from '../../models/message';
 import { DataService } from '../../services/data.service';
 import { AttachmentInfo, AttachmentUI } from '../../models/attachment';
 import { AttachmentsViewerService } from '../../services/attachments-viewer.service';
 import { AttachmentActionsService } from '../../services/attachment-actions.service';
+import { AttachmentComponent } from '../attachment/attachment';
+import { DOCUMENT_TYPES } from '../../shared/constants.js';
+
+interface CopyFeedback {
+  show: boolean;
+  message: string;
+}
 
 @Component({
   selector: 'app-message-box',
-  imports: [],
+  imports: [AttachmentComponent],
   templateUrl: './message-box.html',
   styleUrl: './message-box.css',
 })
 export class MessageBox implements OnInit {
+  atts: AttachmentInfo[] = [];
+  attUIs = signal<AttachmentUI[]>([]);
+  copyFeedback = signal<CopyFeedback>({ show: false, message: '' });
   deviceId!: string;
-  attachmentUIs = signal<AttachmentUI[]>([]);
-  copyingUrl = signal<string | null>(null);
-  copySuccessUrl = signal<string | null>(null);
-  copyErrorUrl = signal<string | null>(null);
-  private copyTimeouts = new Map<string, number>();
+  readonly imageUIs = computed(() => this.attUIs().filter((a) => a.type === 'img'));
+  readonly docUIs = computed(() => this.attUIs().filter((a) => a.type === 'doc'));
 
   @Input() message!: Message;
   @Input() sameDeviceAsPrevious!: Boolean;
@@ -31,73 +38,63 @@ export class MessageBox implements OnInit {
   }
 
   ngOnInit(): void {
-    this.attachmentUIs.set(this.message.attachments.map((a) => ({ attachment: a, loaded: false })));
+    const attUIs = this.message.attachments.map((a, index) => {
+      const type: 'doc' | 'img' = this.isDocumentType(a) ? 'doc' : 'img';
+      return { attachment: a, loaded: false, type, index };
+    });
+
+    this.attUIs.set(attUIs);
   }
 
-  onImageLoad(url: string) {
-    this.attachmentUIs.update((atts) =>
-      atts.map((a) => (a.attachment.url == url ? { ...a, loaded: true } : a)),
-    );
+  async copyAttachment(att: AttachmentInfo) {
+    const success = await this.attachmentActionsService.copyAttachment(att, this.message.text);
+
+    this.attUIs.update((atts) => {
+      return atts.map((a) => (a.attachment.url == att.url ? { ...a, copied: success } : a));
+    });
+
+    // Show feedback tooltip
+    const message = success ? 'Copied to clipboard' : 'Unsupported format';
+    this.copyFeedback.set({ show: true, message });
+
+    // Auto-hide after 2 seconds
+    setTimeout(() => {
+      this.copyFeedback.set({ show: false, message: '' });
+    }, 2000);
   }
 
-  onAttachmentClick(index: number, event: MouseEvent) {
-    const isCopyClick = event.ctrlKey || event.metaKey;
-    const atms = this.attachmentUIs();
-
-    if (isCopyClick) {
-      this.copyAttachment(atms[index].attachment, event);
+  async copy() {
+    // If there's an attachment, copy it with the text
+    if (this.attUIs().length > 0) {
+      await this.copyAttachment(this.attUIs()[0].attachment);
     } else {
-      this.viewAttachment(index, event);
+      // If no attachments, just show a feedback for text-only copy
+      this.copyFeedback.set({ show: true, message: 'Copied to clipboard' });
+      setTimeout(() => {
+        this.copyFeedback.set({ show: false, message: '' });
+      }, 2000);
     }
   }
 
   viewAttachment(index: number, event: MouseEvent) {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
-    this.attachmentViewerService.show(this.attachmentUIs(), rect, index);
-  }
+    const att = this.attUIs()[index];
 
-  async copyAttachment(attachment: AttachmentInfo, event: MouseEvent) {
-    event.stopPropagation();
-
-    const url = attachment.url;
-
-    // Clear any existing timeout for this attachment
-    if (this.copyTimeouts.has(url)) {
-      clearTimeout(this.copyTimeouts.get(url)!);
-      this.copyTimeouts.delete(url);
-    }
-
-    // Set to loading state
-    this.copyingUrl.set(url);
-    this.copySuccessUrl.set(null);
-    this.copyErrorUrl.set(null);
-
-    // Perform the copy action
-    const success = await this.attachmentActionsService.copyAttachment(
-      attachment,
-      this.message.text,
-    );
-
-    // Set to success or error state
-    this.copyingUrl.set(null);
-    if (success) {
-      this.copySuccessUrl.set(url);
+    if (att.type === 'img') {
+      // Show images
+      this.attachmentViewerService.showImages(this.imageUIs(), rect, index);
     } else {
-      this.copyErrorUrl.set(url);
+      if (index == 3 && this.docUIs().length > 4) {
+        // Show documents
+        this.attachmentViewerService.showImages(this.docUIs(), rect, index);
+      } else {
+        // Show single document
+        this.attachmentViewerService.openDoc(att);
+      }
     }
-
-    // Reset to normal state after 3 seconds
-    const timeout = window.setTimeout(() => {
-      this.copySuccessUrl.set(null);
-      this.copyErrorUrl.set(null);
-      this.copyTimeouts.delete(url);
-    }, 2000);
-
-    this.copyTimeouts.set(url, timeout);
   }
 
-  onDownloadAttachment(attachment: AttachmentInfo, event: MouseEvent) {
-    event.stopPropagation();
-    this.attachmentActionsService.downloadAttachment(attachment);
+  isDocumentType(attachment: AttachmentInfo) {
+    return DOCUMENT_TYPES.includes(attachment.type);
   }
 }

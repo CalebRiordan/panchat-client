@@ -1,59 +1,90 @@
-# PanchatClient
+# PanChat Client
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
+A modern, real-time chat application built with **Angular 21** and powered by **SignalR** for seamless messaging. PanChat provides a responsive, feature-rich messaging experience with support for file attachments, dark mode, and JWT-based authentication.
 
-## Development server
+## 📋 Table of Contents
 
-To start a local development server, run:
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Installation & Setup](#installation--setup)
+- [Running the Application](#running-the-application)
+- [Project Structure](#project-structure)
+- [Key Services](#key-services)
+- [Development](#development)
+- [Building for Production](#building-for-production)
+- [Testing](#testing)
 
-```bash
-ng serve
-```
+## ✨ Features
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- **Real-time Messaging**: Instant message delivery using Microsoft SignalR
+- **File Attachments**: Support for multiple file formats including:
+  - Documents (DOCX)
+  - Images (HEIC, PNG, JPG, etc.)
+  - PDFs
+- **User Authentication**: Secure JWT token-based authentication
+- **Theme Support**: Toggle between light and dark modes
+- **Responsive Design**: Mobile-friendly UI
+- **Toast Notifications**: User-friendly feedback system
 
-## Code scaffolding
+## 🛠 Tech Stack
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- **Frontend Framework**: [Angular 21](https://angular.io/)
+- **Real-time Communication**: [@microsoft/signalr](https://github.com/SignalR/SignalR)
+- **TypeScript**: 5.9.3
 
-```bash
-ng generate component component-name
-```
+### Optional Dependencies
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- **PDF Viewer**: pdfjs-dist (PDF document preview)
+- **Document Preview**: docx-preview (Word document rendering)
+- **Image Conversion**: heic-to (HEIC to standard image format)
+- **JWT Parsing**: jwt-decode (Token decoding)
 
-```bash
-ng generate --help
-```
+## 🔧 Key Services
 
-## Building
+### AuthService
 
-To build the project run:
+Handles user authentication, JWT token management, and login/logout functionality.
 
-```bash
-ng build
-```
+### SignalRService
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Manages real-time WebSocket connections using Microsoft SignalR.
 
-## Running unit tests
+**Methods**:
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+- `buildConnection()` - Initialize hub connection
+- `startConnection()` - Connect to SignalR hub
+- `stopConnection()` - Disconnect from hub
+- `on(methodName, handler)` - Listen for server events
+- `invoke(methodName, ...args)` - Call server methods
 
-```bash
-ng test
-```
+### MessageService
 
-## Running end-to-end tests
+Handles chat message retrieval, sending, and caching.
 
-For end-to-end (e2e) testing, run:
+### AttachmentActionsService
 
-```bash
-ng e2e
-```
+Manages file upload and attachment operations.
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### ThemeService
 
-## Additional Resources
+Toggles between light and dark themes, persisting user preference.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+### ToastService
+
+Displays notification messages to users.
+
+## 🔌 API Integration
+
+The application communicates with the backend through:
+
+- **HTTP Requests**: RESTful API calls for authentication and data retrieval
+- **SignalR WebSocket**: Real-time messaging and notifications
+
+### Required Backend Endpoints
+
+- `POST /api/auth/login` - User authentication
+- `GET /api/messages` - Fetch message history
+- `POST /api/messages` - Send new message
+- `POST /api/attachments/upload` - Upload file attachment
+- `WS /hub` - SignalR hub connection

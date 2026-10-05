@@ -11,7 +11,17 @@
     --charcoal-blue: #28353c;
 
     font-size: 62.5%;
-    font-family: 'Verdana', ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    
+    /* Modern design tokens */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 html.dark-mode {
@@ -24,21 +34,166 @@ html.dark-mode {
 }
 
 html.light-mode {
-    /* Add light mode */
+    --colour-background: #f0f5f4;
+    /* very light teal-white, like #f6f3e7 but cooler  */
+    --colour-text: #f1fbf7;
+    /* dark forest green — strong contrast, on-palette  */
+    --colour-highlight: #95c6c1;
+    /* soft blue-teal for surfaces/inputs               */
+    --colour-on-background: #50ab9a;
+    /* vibrant teal replaces shamrock as highlight      */
+    --colour-on-background-contrast: #93f5e1;
+    /* same teal, used for borders/accents              */
+    --colour-background-variant: #315b51;
 }
 
-@media (max-width: 1200px) {
-    :root {
-        font-size: 50%;
+/* Tooltip styling */
+[tooltip] {
+    position: relative;
+}
+
+[tooltip]::after,
+[tooltip]::before {
+    position: absolute;
+    top: -0.6rem;
+    left: 50%;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity var(--transition-fast) ease-out, visibility var(--transition-fast) ease-out;
+    visibility: hidden;
+}
+
+[tooltip]::before {
+    content: "";
+    transform: translateX(-50%);
+    border-width: 5px 7px 0 7px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+}
+
+[tooltip]::after {
+    content: attr(tooltip);
+    transform: translateX(-50%) translateY(-100%);
+    background: rgba(0, 0, 0, 0.9);
+    text-align: center;
+    color: #fff;
+    padding: 0.6rem 1rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+    min-width: 80px;
+    border-radius: 0.6rem;
+    pointer-events: none;
+    box-shadow: var(--shadow-lg);
+}
+
+[tooltip-position='left']::before {
+    left: 0%;
+    top: 50%;
+    margin-left: -1.2rem;
+    transform: translatey(-50%) rotate(-90deg)
+}
+
+[tooltip-position='top']::before {
+    left: 50%;
+}
+
+[tooltip-position='bottom']::before {
+    top: 100%;
+    margin-top: 0.8rem;
+    transform: translateX(-50%) translatey(-100%) rotate(-180deg)
+}
+
+[tooltip-position='right']::before {
+    left: 100%;
+    top: 50%;
+    margin-left: 0.1rem;
+    transform: translatey(-50%) rotate(90deg)
+}
+
+[tooltip-position='left']::after {
+    left: 0%;
+    top: 50%;
+    margin-left: -0.8rem;
+    transform: translateX(-100%) translateY(-50%);
+}
+
+[tooltip-position='top']::after {
+    left: 50%;
+}
+
+[tooltip-position='bottom']::after {
+    top: 100%;
+    margin-top: 0.8rem;
+    transform: translateX(-50%) translateY(0%);
+}
+
+[tooltip-position='right']::after {
+    left: 100%;
+    top: 50%;
+    margin-left: 0.8rem;
+    transform: translateX(0%) translateY(-50%);
+}
+
+[tooltip]:hover::after,
+[tooltip]:hover::before {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Modern scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--colour-background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--colour-on-background-contrast);
+    border-radius: 4px;
+    transition: background var(--transition-base);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--colour-highlight);
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
     }
 }
+
 
 @media (max-width: 768px) {
-    .messages-container {
-        width: 31.25%;
+    main {
+        padding: 0.3rem;
     }
 
+    #content-area {
+        border-radius: 0.8rem;
+        box-shadow: var(--shadow-md);
+    }
+}
+
+@media (max-width: 480px) {
     :root {
-        font-size: 37.5%;
+        font-size: 56.25%;
+    }
+
+    main {
+        padding: 0.2rem;
+        width: 100vw;
+        height: 100vh;
+    }
+
+    #content-area {
+        border-radius: 0.4rem;
     }
 }

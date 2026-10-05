@@ -1,4 +1,4 @@
-.attachments-viewer{
+.attachments-viewer {
     position: fixed;
     top: 4rem;
     left: 4rem;
@@ -7,7 +7,7 @@
     z-index: 999;
     padding: 0.5rem 0.8rem;
 
-    background-color: color-mix(in srgb, var(--colour-background-variant), transparent 100%);
+    background-color: color-mix(in srgb, var(--colour-background-variant), transparent 95%);
     border-radius: 2rem;
     box-sizing: border-box;
 
@@ -28,10 +28,29 @@
     gap: 4rem;
     justify-content: center;
     overflow-y: scroll;
-
 }
 
-.close-button{
+app-attachment {
+    --attachment-height-min: 55vh;
+    --attachment-height-max: 75vh;
+    --attachment-height-doc: 40vh;
+
+    opacity: 0;
+    will-change: transform, opacity;
+    transition: opacity 0.4s ease;
+}
+
+.back-button {
+    position: absolute;
+    top: 2rem;
+    left: 3rem;
+    line-height: 0.8;
+    font-size: 5rem;
+    cursor: pointer;
+    color: var(--colour-text);
+}
+
+.close-button {
     position: absolute;
     top: 2rem;
     right: 3rem;
@@ -41,18 +60,199 @@
     color: var(--colour-text);
 }
 
-img { 
-    opacity: 0;
-
-    border-radius: 2rem;
-    width: auto;
-    min-height: 55vh;
-    max-height: 75vh;
-    object-fit: cover;
-    will-change: transform, opacity;
-    transition: opacity 0.4s ease;
+.viewer-visible app-attachment {
+    opacity: 1;
 }
 
-.viewer-visible img {
-    opacity: 1;
+.document-viewer {
+    width: 100%;
+    min-height: 75vh;
+    overflow: auto;
+    background-color: var(--colour-background-variant);
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.document-viewer.loading {
+    justify-content: center;
+    filter: brightness(0.85);
+}
+
+.loading .document-loader {
+    display: inline-block;
+}
+
+.document-loader {
+    /* normal state */
+    display: none;
+
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid var(--colour-text);
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+/* Tablet Responsive */
+@media (max-width: 1200px) {
+    .attachments-viewer {
+        top: 3rem;
+        left: 3rem;
+        bottom: 3rem;
+        right: 3rem;
+        border-radius: 1.5rem;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .images-container {
+        padding: 3rem 4rem;
+        gap: 3rem;
+    }
+
+    app-attachment {
+        --attachment-height-min: 45vh;
+        --attachment-height-max: 60vh;
+        --attachment-height-doc: 35vh;
+    }
+
+    .back-button {
+        top: 1.5rem;
+        left: 2rem;
+        font-size: 4rem;
+    }
+
+    .close-button {
+        top: 1.5rem;
+        right: 2rem;
+        font-size: 4rem;
+    }
+
+    .document-viewer {
+        min-height: 60vh;
+    }
+}
+
+/* Mobile Tablet */
+@media (max-width: 768px) {
+    .attachments-viewer {
+        top: 1.5rem;
+        left: 0.8rem;
+        bottom: 1.5rem;
+        right: 0.8rem;
+        border-radius: 1rem;
+        padding: 0.3rem 0.4rem;
+    }
+
+    .images-container {
+        padding: 2rem 2.2rem;
+        gap: 2rem;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    app-attachment {
+        --attachment-height-min: 48vh;
+        --attachment-height-max: 62vh;
+        --attachment-height-doc: 38vh;
+    }
+
+    .back-button {
+        top: 1rem;
+        left: 1.2rem;
+        font-size: 3.2rem;
+    }
+
+    .close-button {
+        top: 1rem;
+        right: 1.2rem;
+        font-size: 3.2rem;
+    }
+
+    .document-viewer {
+        min-height: 62vh;
+    }
+
+    .document-loader {
+        width: 1.8rem;
+        height: 1.8rem;
+        border-width: 2px;
+    }
+}
+
+/* Mobile Phone */
+@media (max-width: 480px) {
+    .attachments-viewer {
+        top: 0.8rem;
+        left: 0.6rem;
+        bottom: 0.8rem;
+        right: 0.6rem;
+        border-radius: 0.7rem;
+        padding: 0.2rem 0.3rem;
+    }
+
+    .images-container {
+        padding: 1.2rem 1.2rem;
+        gap: 1.2rem;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    app-attachment {
+        --attachment-height-min: 52vh;
+        --attachment-height-max: 65vh;
+        --attachment-height-doc: 42vh;
+    }
+
+    .back-button {
+        top: 0.7rem;
+        left: 0.8rem;
+        font-size: 2.6rem;
+    }
+
+    .close-button {
+        top: 0.7rem;
+        right: 0.8rem;
+        font-size: 2.6rem;
+    }
+
+    .document-viewer {
+        min-height: 65vh;
+        padding: 0.4rem;
+    }
+
+    .document-loader {
+        width: 1.6rem;
+        height: 1.6rem;
+        border-width: 2px;
+    }
+}
+
+.pdf-pages-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 1rem 0;
+    /* border-radius: 2rem; */
+    /* border: 1px solid var(--colour-background-variant) */
+}
+
+.pdf-page-canvas {
+    display: block;
+    margin: 0 auto 1rem auto;
+    max-width: 100%;
+    height: auto;
+}
+
+.word-viewer {
+    width: 100%;
+    height: 100%;
+}
+
+.word-viewer>* {
+    margin: 0 !important;
 }
