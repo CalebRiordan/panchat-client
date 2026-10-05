@@ -40,7 +40,7 @@ interface FilePreview {
 
 @Component({
   selector: 'app-chat',
-  imports: [MessageBox, AttachmentsViewer],
+  imports: [MessageBox, AttachmentsViewer, Navbar],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
 })
