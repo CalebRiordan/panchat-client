@@ -19,7 +19,9 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router,
-  ) {}
+  ) {
+  console.log(env.baseApiUrl);
+  }
 
   private apiAuth(
     username: string,
