@@ -50,8 +50,6 @@ export class ClipboardService {
       // Write blobs to clipboard
       const item = new ClipboardItem(clipboardData);
       await navigator.clipboard.write([item]);
-
-      console.log('Successfully copied mixed content!');
     } catch (err) {
       console.error('Clipboard write failed:', err); // Not fatal
     }

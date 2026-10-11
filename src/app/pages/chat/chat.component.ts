@@ -67,8 +67,6 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   @HostListener('window:paste', ['$event'])
   onPaste(event: ClipboardEvent) {
-    console.log("Paste text");
-    
     if (event.clipboardData) this.clipboardService.paste(event.clipboardData);
     event.preventDefault();
   }
@@ -189,8 +187,6 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     // Listen for new messages
     this.messageService.onIncomingMessage((m: Message) => {
-      console.log('Received message from websocket connection');
-
       this.messages.update((msgs) => [...msgs, m]);
     });
   }
