@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 interface AuthResponse {
   token: string;
 }
-const AUTH_FIELDS: Array<string> = ['username', 'password'];
+const AUTH_FIELDS = ['username', 'password'] as const;
 
 @Injectable({
   providedIn: 'root',
@@ -75,18 +75,13 @@ export class AuthService {
     if (errors) {
       Object.keys(errors).forEach((fieldName) => {
         const localFieldName = fieldName.toLowerCase();
-        if (AUTH_FIELDS.includes(localFieldName)) {
+        if (AUTH_FIELDS.includes(localFieldName as (typeof AUTH_FIELDS)[number])) {
           result[localFieldName] = errors[fieldName][0]; // Take the first error message
         }
       });
-    }
-    // API returned simple string error message
-    else {
-      result['general'] =
-        typeof err.error === 'string'
-          ? err.error
-          : (err.error?.message ?? 'An unknown error occurred');
-    }
+    } else if (err.status == 500) {
+      result['general'] = 'Something went wrong while trying to authenticate you.';
+    } else result['general'] = 'An unknown error occurred';
 
     return result;
   }

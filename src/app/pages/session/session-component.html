@@ -19,7 +19,7 @@
         </div>
 
         <label for="password">Password</label>
-        <div class="input-group">
+        <div class="input-group password-group">
             <input [type]="showPassword ? 'text' : 'password'" name="password" formControlName="password">
             <button type="button" class="password-toggle" (click)="togglePasswordVisibility()" tabindex="-1">
                 @if (showPassword) {

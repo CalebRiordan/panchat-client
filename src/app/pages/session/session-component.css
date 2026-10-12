@@ -87,11 +87,14 @@ form input {
     font-size: 2.5rem;
     color: var(--colour-text);
     padding: 0.5rem 1.4rem;
-    padding-right: 4rem;
     border: 2px solid var(--colour-highlight);
     border-radius: 1rem;
     margin-bottom: 3rem;
     outline: none;
+}
+
+form .password-group input {
+    padding-right: 4rem;
 }
 
 form input:focus {

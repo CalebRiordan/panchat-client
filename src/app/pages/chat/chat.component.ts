@@ -62,7 +62,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   sendingMessage = signal(false);
 
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
-  @ViewChild('messageInput') private messageInput!: ElementRef;
+  @ViewChild('messageInput') private messageInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChildren(MessageBox) messageBoxes!: QueryList<MessageBox>;
 
   @HostListener('window:paste', ['$event'])
@@ -88,9 +88,13 @@ export class ChatComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Don't interfere with system keyboard shortcuts (Ctrl+C, Ctrl+V, Ctrl+A)
+    // Don't interfere with system keyboard shortcuts (Ctrl+C, Ctrl+V)
     if (event.ctrlKey) {
-      if (['a', 'c', 'v'].includes(event.key.toLowerCase())) {
+      if (event.key.toLowerCase() == 'a' && this.messageInput.nativeElement.value !== '') {
+        this.messageInput.nativeElement.focus();
+      }
+
+      if (['c', 'v'].includes(event.key.toLowerCase())) {
         return; // These are handled by browser/other handlers
       }
       return; // Skip other Ctrl combinations
@@ -195,7 +199,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.messages.set([]);
     this.files.set([]);
   }
-
 
   private scrollToBottom(onlyWhenNearBottom = true) {
     setTimeout(() => {
@@ -371,5 +374,4 @@ export class ChatComponent implements OnInit, OnDestroy {
   onRemoveAllPreviews() {
     this.files.set([]);
   }
-
 }
